@@ -31,17 +31,6 @@ const games = [
     thumbnail: "🏎️",
     accent: "linear-gradient(135deg, #818cf8, #ec4899)",
     path: "./games/racer/index.html"
-  },
-  {
-    id: "sky-hopper",
-    title: "Sky Hopper",
-    description: "Bounce between floating platforms and chase the highest score in the clouds.",
-    category: "Puzzle",
-    featured: false,
-    trending: false,
-    thumbnail: "☁️",
-    accent: "linear-gradient(135deg, #38bdf8, #14b8a6)",
-    path: "./games/sky-hopper/index.html"
   }
 ];
 
