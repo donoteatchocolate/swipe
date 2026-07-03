@@ -8,7 +8,7 @@ const games = [
     trending: true,
     thumbnail: "💼",
     accent: "linear-gradient(135deg, #2dd4bf, #2563eb)",
-    path: "./Games/businessclicker/index.html"
+    path: "./games/businessclicker/index.html"
   },
   {
     id: "tiny-royale",
@@ -19,7 +19,7 @@ const games = [
     trending: true,
     thumbnail: "⚔️",
     accent: "linear-gradient(135deg, #fb923c, #ef4444)",
-    path: "./Games/tinyroyale/index.html"
+    path: "./games/tinyroyale/index.html"
   },
   {
     id: "neon-drift",
@@ -30,7 +30,7 @@ const games = [
     trending: true,
     thumbnail: "🏎️",
     accent: "linear-gradient(135deg, #818cf8, #ec4899)",
-    path: "./Games/neon-drift/index.html"
+    path: "./games/neon-drift/index.html"
   },
   {
     id: "sky-hopper",
@@ -41,7 +41,7 @@ const games = [
     trending: false,
     thumbnail: "☁️",
     accent: "linear-gradient(135deg, #38bdf8, #14b8a6)",
-    path: "./Games/sky-hopper/index.html"
+    path: "./games/sky-hopper/index.html"
   }
 ];
 
