@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Untitled</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Racer - Elite Edition</title>
+    
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #050505;
+            font-family: 'Courier New', Courier, monospace;
+            user-select: none;
+        }
+
+        .hidden { display: none !important; }
+
+        /* LAYOUT */
+        #splash-screen, #lobby-screen {
+            position: absolute; width: 100%; height: 100%;
+            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100;
+        }
+
+        /* TYPOGRAPHY & BUTTONS */
+        .mega-title {
+            color: #00ffff; font-size: 80px; font-weight: 900; font-style: italic;
+            text-shadow: 4px 4px 0px #ff00ff, 0 0 30px #00ffff; margin: 0;
+            text-align: center;
+        }
+        .subtitle { color: white; letter-spacing: 5px; margin-bottom: 50px; }
+        .section-title { color: white; margin-bottom: 30px; font-size: 24px; }
+
+        #btn-main-start {
+            background: transparent; color: #00ff00; font-family: inherit;
+            font-size: 30px; font-weight: bold; padding: 20px 60px;
+            border: 4px solid #00ff00; box-shadow: 0 0 20px #00ff00;
+            cursor: pointer; transition: 0.2s;
+        }
+        #btn-main-start:hover { background: #00ff00; color: black; box-shadow: 0 0 50px #00ff00; }
+
+        .btn-small {
+            margin-top: 50px; background: transparent; border: 1px solid #555;
+            color: #888; padding: 10px 20px; cursor: pointer;
+        }
+        .btn-small:hover { border-color: white; color: white; }
+
+        /* LOBBY CARDS */
+        #track-list { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;}
+        .track-card {
+            background: #222; border: 2px solid #444; padding: 30px;
+            width: 200px; text-align: center; border-radius: 4px; cursor: pointer; transition: 0.2s;
+        }
+        .track-card:hover { border-color: #ff0055; background: #2a2a2a; transform: translateY(-10px); }
+        .track-name { font-size: 24px; font-weight: bold; color: white; margin-bottom: 10px; }
+        .track-desc { color: #aaa; font-size: 12px; margin-bottom: 10px; height: 40px; }
+        .track-best { color: #00ff00; font-weight: bold; font-size: 16px; }
+
+        /* GAME UI */
+        #game-ui { pointer-events: none; width: 100%; height: 100%; position: absolute; }
+        #dist-box { position: absolute; top: 20px; left: 20px; font-size: 30px; color: #00ff00; font-weight: bold; }
+        #timer-box { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 30px; color: #ffeb3b; font-weight: bold; }
+        #speed-box { position: absolute; bottom: 20px; right: 20px; color: #00ffff; font-size: 50px; font-style: italic; font-weight: 900; }
+        #btn-exit { position: absolute; top: 20px; right: 20px; pointer-events: auto; background: #ff4444; color: white; border: none; padding: 10px 15px; cursor: pointer; }
+
+        #respawn-msg {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 50px; color: red; font-weight: bold; background: black; padding: 20px;
+            border: 2px solid red; z-index: 50;
+        }
+
+        /* WIN MODAL */
+        #win-screen {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95); border: 4px solid #00ff00;
+            padding: 50px; text-align: center; z-index: 20; min-width: 300px;
+        }
+        .win-stat { color: white; font-size: 24px; margin-bottom: 30px; }
+        #btn-back-lobby { background: #00ff00; color: black; border: none; padding: 15px 40px; font-size: 20px; font-weight: bold; cursor: pointer; }
+    </style>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+        }
+      }
+    </script>
+</head>
+<body>
+
+    <a href="../../index.html" class="fixed left-3 top-3 z-50 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-slate-950/80 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-200 shadow-lg backdrop-blur transition hover:bg-slate-900/90" style="pointer-events:auto;">↩ Menu</a>
+
+    <div id="splash-screen">
+        <h1 class="mega-title">Racer</h1>
+        <p class="subtitle">Elite Edition</p>
+        <button id="btn-main-start">START PLAYING</button>
+    </div>
+
+    <div id="lobby-screen" class="hidden">
+        <h2 class="section-title">SELECT DIFFICULTY</h2>
+        <div id="track-list"></div>
+        <button id="btn-back-splash" class="btn-small">BACK</button>
+    </div>
+
+    <div id="game-ui" class="hidden">
+        <div id="dist-box">DIST: <span id="dist">0</span>m</div>
+        <div id="timer-box">TIME: <span id="timer">00:00</span></div>
+        <div id="speed-box"><span id="speed">0</span> KM/H</div>
+        <div id="respawn-msg" class="hidden">i think you fell off...</div>
+        <button id="btn-exit">be a quitter</button>
+    </div>
+
+    <div id="win-screen" class="hidden">
+        <h1 style="color:#00ff00; text-shadow:0 0 20px #00ff00">its about time</h1>
+        <p class="win-stat">Time: <span id="final-time">00:00</span></p>
+        <button id="btn-back-lobby">Return TO LOBBY</button>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- CONFIGURATION ---
+        const CAR_ACCEL = 0.8;
+        const CAR_FRICTION = 0.98;
+        const CAR_BRAKE = 0.94;
+        const GRAVITY = 0.05;
+        const JUMP_FORCE = 1.4;
+
+        const TRACKS = [
+            { 
+                id: 'track1', name: 'NOVICE', type: 'open', length: 3000, 
+                desc: 'Wide open highway. Dodge the pyramids.',
+                color: 0x00ffff, fog: 0x050510 
+            },
+            { 
+                id: 'track2', name: 'PRO', type: 'walls', length: 4000, 
+                desc: 'Narrow track with barriers.',
+                color: 0xff0055, fog: 0x100505 
+            },
+            { 
+                id: 'track3', name: 'ELITE', type: 'jumps', length: 6000, 
+                desc: 'Floating platforms. Ramps are key!',
+                color: 0xaa00ff, fog: 0x050010 
+            }
+        ];
+
+        // --- STATE ---
+        let scene, camera, renderer, animationId;
+        let carGroup, wheels = [];
+        let finishZone;
+        let raycaster = new THREE.Raycaster();
+        let downVector = new THREE.Vector3(0, -1, 0);
+
+        // Physics Objects
+        let floorMeshes = []; 
+        let obstacleMeshes = []; 
+        let rampMeshes = []; 
+
+        // Physics State
+        let velocity = 0;
+        let verticalVelocity = 0; 
+        let carAngle = 0;
+        let steeringAngle = 0;
+        let onGround = true;
+        let isDead = false;
+
+        // Game Flow
+        let keys = { w: false, a: false, s: false, d: false, space: false };
+        let startTime, isGameRunning = false, currentTrack = null;
+
+        // --- DOM ELEMENTS ---
+        const elSplash = document.getElementById('splash-screen');
+        const elLobby = document.getElementById('lobby-screen');
+        const elGameUI = document.getElementById('game-ui');
+        const elWinScreen = document.getElementById('win-screen');
+        const elTrackList = document.getElementById('track-list');
+        const elRespawn = document.getElementById('respawn-msg');
+
+        // --- BUTTON LISTENERS ---
+        document.getElementById('btn-main-start').onclick = showLobby;
+        document.getElementById('btn-back-splash').onclick = showSplash;
+        document.getElementById('btn-exit').onclick = () => { stopGame(); showLobby(); };
+        document.getElementById('btn-back-lobby').onclick = () => { stopGame(); showLobby(); };
+
+        // --- SCREEN FLOW ---
+        function showSplash() {
+            elSplash.classList.remove('hidden');
+            elLobby.classList.add('hidden');
+            elGameUI.classList.add('hidden');
+            elWinScreen.classList.add('hidden');
+        }
+
+        function showLobby() {
+            elSplash.classList.add('hidden');
+            elLobby.classList.remove('hidden');
+            elGameUI.classList.add('hidden');
+            elWinScreen.classList.add('hidden');
+            renderTrackList();
+        }
+
+        function renderTrackList() {
+            elTrackList.innerHTML = '';
+            TRACKS.forEach(track => {
+                const bestTime = localStorage.getItem(`neon_racer_${track.id}`) || '--:--';
+                const card = document.createElement('div');
+                card.className = 'track-card';
+                card.innerHTML = `
+                    <div class="track-name">${track.name}</div>
+                    <div class="track-desc">${track.desc}</div>
+                    <div class="track-best">Best: ${bestTime}</div>
+                `;
+                card.onclick = () => startGame(track);
+                elTrackList.appendChild(card);
+            });
+        }
+
+        // --- GAME LOGIC ---
+        function startGame(trackConfig) {
+            currentTrack = trackConfig;
+            isGameRunning = true;
+            isDead = false;
+            
+            // Reset Physics
+            velocity = 0; verticalVelocity = 0; carAngle = 0; steeringAngle = 0;
+            keys = { w: false, a: false, s: false, d: false, space: false };
+
+            elLobby.classList.add('hidden');
+            elGameUI.classList.remove('hidden');
+            elRespawn.classList.add('hidden');
+            
+            startTime = Date.now();
+            setupScene(trackConfig);
+            animate();
+        }
+
+        function stopGame() {
+            isGameRunning = false;
+            cancelAnimationFrame(animationId);
+            if (renderer) {
+                document.body.removeChild(renderer.domElement);
+                renderer.dispose();
+            }
+        }
+
+        function respawnCar() {
+            if(isDead) return;
+            isDead = true;
+            elRespawn.classList.remove('hidden');
+            velocity = 0;
+            verticalVelocity = 0;
+
+            setTimeout(() => {
+                carGroup.position.set(0, 5, 0); 
+                carGroup.rotation.set(0,0,0);
+                velocity = 0;
+                verticalVelocity = 0;
+                carAngle = 0;
+                steeringAngle = 0;
+                isDead = false;
+                elRespawn.classList.add('hidden');
+            }, 1000);
+        }
+
+        function finishLevel() {
+            isGameRunning = false;
+            const timeElapsed = Date.now() - startTime;
+            const mins = Math.floor(timeElapsed / 60000);
+            const secs = ((timeElapsed % 60000) / 1000).toFixed(2);
+            const timeString = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+            const saved = localStorage.getItem(`neon_racer_${currentTrack.id}`);
+            if (!saved || timeString < saved) {
+                localStorage.setItem(`neon_racer_${currentTrack.id}`, timeString);
+            }
+
+            document.getElementById('final-time').innerText = timeString;
+            elWinScreen.classList.remove('hidden');
+            elGameUI.classList.add('hidden');
+        }
+
+        // --- 3D SCENE GENERATION ---
+        function setupScene(config) {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(config.fog);
+            scene.fog = new THREE.Fog(config.fog, 50, 450);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, 5, -15);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
+
+            const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambient);
+            const sun = new THREE.DirectionalLight(config.color, 1.2);
+            sun.position.set(100, 200, 100);
+            sun.castShadow = true;
+            sun.shadow.camera.left = -500;
+            sun.shadow.camera.right = 500;
+            sun.shadow.camera.top = 500;
+            sun.shadow.camera.bottom = -500;
+            scene.add(sun);
+
+            floorMeshes = [];
+            obstacleMeshes = [];
+            rampMeshes = [];
+
+            // --- TRACK GENERATION ---
+            
+            // 1. FLOOR & RAMPS
+            if (config.type === 'jumps') {
+                let zPos = 0;
+                
+                // Loop to create platforms separated by holes
+                while (zPos < config.length) {
+                    const platformLength = 400 + Math.random() * 200;
+                    const platformCenter = zPos + platformLength/2;
+                    const gapSize = 80; // Distance to jump
+                    
+                    // Create the Platform
+                    createFloorBlock(0, platformCenter, 140, platformLength, config.color);
+                    
+                    // *** RAMP LOGIC: Place Ramp at the END of this platform ***
+                    const rampZ = (zPos + platformLength) - 15; 
+                    
+                    // Create Ramp
+                    const ramp = new THREE.Mesh(new THREE.BoxGeometry(30, 2, 30), 
+                        new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0x444400 })
+                    );
+                    ramp.rotation.x = -0.4; // Angle up
+                    ramp.position.set(0, 6, rampZ); // y=6 (Top of slab + 1)
+                    scene.add(ramp);
+                    rampMeshes.push(ramp);
+
+                    // Move cursor forward past platform + gap
+                    zPos += platformLength + gapSize; 
+                }
+            } else {
+                // Normal continuous track for Novice/Pro
+                createFloorBlock(0, config.length/2, 200, config.length + 500, config.color);
+            }
+
+            // 2. OBSTACLES (Pyramids & Walls)
+            const obsMat = new THREE.MeshPhongMaterial({ color: 0xff0055, shininess: 100 });
+            const wallMat = new THREE.MeshPhongMaterial({ color: 0x888888 });
+
+            // Reduce random obstacles in Elite mode so they don't block the ramps
+            const obsCount = config.type === 'jumps' ? 30 : 60;
+
+            for (let i = 0; i < obsCount; i++) {
+                const z = Math.random() * config.length;
+                
+                // Safety check: Don't spawn obstacles too close to Ramps (Elite Mode)
+                let unsafe = false;
+                if (config.type === 'jumps') {
+                     // If z is within 50 units of any ramp, skip
+                     for(let r of rampMeshes) {
+                         if(Math.abs(r.position.z - z) < 50) unsafe = true;
+                     }
+                }
+                if(unsafe) continue;
+
+                const xRange = config.type === 'jumps' ? 40 : 80;
+                const x = (Math.random() - 0.5) * (xRange * 2);
+                
+                // PYRAMIDS
+                const pyr = new THREE.Mesh(new THREE.ConeGeometry(8, 12, 4), obsMat);
+                pyr.position.set(x, 6, z);
+                pyr.scale.set(1.5, 1, 1.5);
+                pyr.castShadow = true;
+                pyr.userData = { type: 'pyramid', radius: 8 }; 
+                scene.add(pyr);
+                obstacleMeshes.push(pyr);
+
+                // WALLS (Pro/Elite only)
+                if (config.type !== 'open' && Math.random() > 0.6) {
+                    const wall = new THREE.Mesh(new THREE.BoxGeometry(40, 20, 5), wallMat);
+                    wall.position.set(x + (Math.random() > 0.5 ? 30 : -30), 10, z + 60);
+                    wall.castShadow = true;
+                    wall.userData = { type: 'wall' };
+                    scene.add(wall);
+                    obstacleMeshes.push(wall);
+                }
+            }
+
+            createCar();
+
+            finishZone = new THREE.Mesh(
+                new THREE.CylinderGeometry(50, 50, 500, 32),
+                new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 })
+            );
+            finishZone.position.set(0, 0, config.length);
+            scene.add(finishZone);
+
+            createFloorBlock(0, 0, 80, 100, config.color);
+        }
+
+        function createFloorBlock(x, z, w, d, color) {
+            const thickness = 10;
+            const geo = new THREE.BoxGeometry(w, thickness, d);
+            const mat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5, metalness: 0.2 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, 0, z); 
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            floorMeshes.push(mesh);
+            
+            const edges = new THREE.EdgesGeometry(geo);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color }));
+            line.position.copy(mesh.position);
+            scene.add(line);
+        }
+
+        function createCar() {
+            carGroup = new THREE.Group();
+            carGroup.position.y = 8; 
+            scene.add(carGroup);
+            
+            const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1, 4.5), new THREE.MeshPhongMaterial({ color: 0xffffff }));
+            chassis.position.y = 1;
+            chassis.castShadow = true;
+            carGroup.add(chassis);
+
+            const wGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16);
+            const wMat = new THREE.MeshBasicMaterial({ color: 0x333333 });
+            const positions = [[-1.2,0.5,1.5], [1.2,0.5,1.5], [-1.2,0.5,-1.5], [1.2,0.5,-1.5]];
+            wheels = [];
+            positions.forEach(p => {
+                const w = new THREE.Mesh(wGeo, wMat);
+                w.rotation.z = Math.PI/2;
+                w.position.set(...p);
+                carGroup.add(w);
+                wheels.push(w);
+            });
+
+            const hLight = new THREE.SpotLight(0xffffff, 2);
+            hLight.position.set(0, 2, 2);
+            hLight.target.position.set(0, 0, 20);
+            carGroup.add(hLight);
+            carGroup.add(hLight.target);
+        }
+
+        // --- INPUTS ---
+        window.addEventListener('keydown', (e) => {
+            if(e.key === ' ' || keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key===' '?'space':e.key.toLowerCase()] = true;
+            if(e.key.startsWith('Arrow')) mapArrows(e.key, true);
+        });
+        window.addEventListener('keyup', (e) => {
+            if(e.key === ' ' || keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key===' '?'space':e.key.toLowerCase()] = false;
+            if(e.key.startsWith('Arrow')) mapArrows(e.key, false);
+        });
+        function mapArrows(k, b) {
+            if(k==='ArrowUp') keys.w = b;
+            if(k==='ArrowDown') keys.s = b;
+            if(k==='ArrowLeft') keys.a = b;
+            if(k==='ArrowRight') keys.d = b;
+        }
+
+        // --- PHYSICS LOOP ---
+        function animate() {
+            if (!isGameRunning) return;
+            animationId = requestAnimationFrame(animate);
+
+            if (isDead) return;
+
+            // 1. MOVEMENT
+            if (keys.w && onGround) velocity += CAR_ACCEL * 0.1;
+            if (keys.s && onGround) velocity -= CAR_ACCEL * 0.1;
+            velocity *= CAR_FRICTION;
+            if (keys.space && onGround) velocity *= CAR_BRAKE;
+
+            if (Math.abs(velocity) > 0.01 && onGround) {
+                if (keys.a) steeringAngle += 0.003;
+                if (keys.d) steeringAngle -= 0.003;
+            }
+            steeringAngle *= 0.90;
+            carAngle += steeringAngle * Math.sign(velocity);
+
+            carGroup.position.x += Math.sin(carAngle) * velocity;
+            carGroup.position.z += Math.cos(carAngle) * velocity;
+            carGroup.position.y += verticalVelocity;
+
+            carGroup.rotation.y = carAngle;
+            wheels.forEach(w => w.rotation.x += velocity * 0.5);
+
+            // 2. GRAVITY
+            const rayOrigin = carGroup.position.clone();
+            rayOrigin.y += 5; 
+            raycaster.set(rayOrigin, downVector);
+            const intersects = raycaster.intersectObjects(floorMeshes);
+
+            let groundY = -999;
+            if (intersects.length > 0) groundY = intersects[0].point.y;
+
+            // Ramps
+            let onRamp = false;
+            for (let ramp of rampMeshes) {
+                // Increased detection radius for ramps so you don't miss them
+                if (carGroup.position.distanceTo(ramp.position) < 20) onRamp = true;
+            }
+
+            if (carGroup.position.y > groundY + 0.1) {
+                verticalVelocity -= GRAVITY;
+                onGround = false;
+            } else {
+                if (verticalVelocity < 0) verticalVelocity = 0;
+                carGroup.position.y = groundY;
+                onGround = true;
+                
+                // BOOST JUMP on Ramp
+                if (onRamp && velocity > 0.5) {
+                    verticalVelocity = JUMP_FORCE; 
+                    onGround = false;
+                }
+            }
+
+            // 3. COLLISION
+            const carBox = new THREE.Box3().setFromObject(carGroup.children[0]);
+            const carRadius = 2.5; 
+
+            for (let obs of obstacleMeshes) {
+                if (obs.userData.type === 'pyramid') {
+                    const dx = carGroup.position.x - obs.position.x;
+                    const dz = carGroup.position.z - obs.position.z;
+                    const distance = Math.sqrt(dx*dx + dz*dz);
+                    if (distance < (obs.userData.radius - 2) + carRadius) {
+                        velocity = -velocity * 0.6;
+                        const angle = Math.atan2(dx, dz);
+                        carGroup.position.x += Math.sin(angle) * 2;
+                        carGroup.position.z += Math.cos(angle) * 2;
+                    }
+                } else {
+                    const obsBox = new THREE.Box3().setFromObject(obs);
+                    if (carBox.intersectsBox(obsBox)) {
+                        velocity = -velocity * 0.6;
+                        carGroup.position.x -= Math.sin(carAngle) * 3;
+                        carGroup.position.z -= Math.cos(carAngle) * 3;
+                    }
+                }
+            }
+
+            // 4. DEATH
+            if (carGroup.position.y < -30) respawnCar();
+
+            // 5. CAMERA & UI
+            const offset = new THREE.Vector3(0, 8, -20).applyMatrix4(carGroup.matrixWorld);
+            camera.position.lerp(offset, 0.1);
+            camera.lookAt(carGroup.position.x, carGroup.position.y + 2, carGroup.position.z + 10);
+
+            const distToFinish = carGroup.position.distanceTo(finishZone.position);
+            
+            const now = Date.now() - startTime;
+            const secs = Math.floor(now/1000);
+            const ms = Math.floor((now%1000)/10);
+            document.getElementById('timer').innerText = `${secs}.${ms<10?'0'+ms:ms}`;
+            document.getElementById('dist').innerText = Math.floor(distToFinish);
+            document.getElementById('speed').innerText = Math.floor(Math.abs(velocity)*100);
+
+            if (distToFinish < 50) finishLevel();
+            renderer.render(scene, camera);
+        }
+    </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"e3c1c9af36de41759418005494a48906","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
+    
+  </body>
+  
+</html>

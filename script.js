@@ -30,7 +30,7 @@ const games = [
     trending: true,
     thumbnail: "🏎️",
     accent: "linear-gradient(135deg, #818cf8, #ec4899)",
-    path: "./games/neon-drift/index.html"
+    path: "./games/racer/index.html"
   },
   {
     id: "sky-hopper",
