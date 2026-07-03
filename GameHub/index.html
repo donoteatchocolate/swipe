@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PixelPlay | Browser Game Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="loading-screen" class="loading-screen" aria-hidden="true">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="site-shell">
+      <header class="topbar">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">◉</span>
+          <span>PixelPlay</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary Navigation">
+          <a href="#featured">Featured</a>
+          <a href="#trending">Trending</a>
+          <a href="#categories">Categories</a>
+        </nav>
+
+        <div class="nav-actions">
+          <label class="searchbar" for="search-input">
+            <span>⌕</span>
+            <input id="search-input" type="search" placeholder="Search games" />
+          </label>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">Instant play • No downloads</p>
+            <h1>Discover your next favorite browser game.</h1>
+            <p>
+              A polished arcade-inspired hub built for fast fun, bold visuals, and seamless play.
+            </p>
+            <div class="hero-actions">
+              <a class="primary-btn" href="#featured">Explore Games</a>
+              <a class="secondary-btn" href="#categories">Browse Categories</a>
+            </div>
+          </div>
+
+          <div class="hero-panel">
+            <div class="stat-card">
+              <strong>120+</strong>
+              <span>Playable titles</span>
+            </div>
+            <div class="stat-card">
+              <strong>4.9/5</strong>
+              <span>Player rating</span>
+            </div>
+            <div class="stat-card">
+              <strong>24/7</strong>
+              <span>Fresh updates</span>
+            </div>
+          </div>
+        </section>
+
+        <section id="categories" class="section-block">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Categories</p>
+              <h2>Pick your mood</h2>
+            </div>
+          </div>
+          <div id="category-filters" class="category-filters"></div>
+        </section>
+
+        <section id="featured" class="section-block">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Featured</p>
+              <h2>Hot right now</h2>
+            </div>
+            <span class="section-tag">Curated picks</span>
+          </div>
+          <div id="featured-games" class="card-grid"></div>
+        </section>
+
+        <section id="trending" class="section-block">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Trending</p>
+              <h2>Most played this week</h2>
+            </div>
+            <span class="section-tag">Live favorites</span>
+          </div>
+          <div id="trending-games" class="card-grid"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

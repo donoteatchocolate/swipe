@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Untitled</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate Empire Clicker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        @keyframes floatUpAndFade {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.2); }
+        }
+        
+        .animate-float {
+            animation: floatUpAndFade 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes toastIn {
+            0% { transform: translateY(100px) scale(0.9); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .animate-toast {
+            animation: toastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes goldenFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+        .animate-golden {
+            animation: goldenFloat 8s linear forwards;
+        }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        /* Custom scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.4);
+        }
+    </style>
+</head>
+<body class="h-screen bg-slate-950 text-slate-100 overflow-hidden flex flex-col relative select-none">
+
+    <!-- Header -->
+    <header class="glass-panel shrink-0 px-6 py-4 flex flex-col md:flex-row justify-between items-center shadow-2xl border-b border-slate-800/50">
+        <div class="flex flex-col md:flex-row items-center gap-3 mb-2 md:mb-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <svg class="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M3 7v1a3 3 0 006 0V4m0 3h6m-6 0a3 3 0 006 0V4m0 3a3 3 0 006 0V4M9 21h6M9 12h6M9 16h6M4 21V9a2 2 0 012-2h12a2 2 0 012 2v12"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-200">
+                        Venture Capitalist
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium tracking-wide">EMPIRE BUILDER</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 mt-2 md:mt-0 md:ml-4">
+                <!-- Achievements Button -->
+                <button id="btn-achievements" type="button" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all active:scale-95 text-amber-400 hover:text-amber-300">
+                    <span>🏆 Achievements</span>
+                    <span id="achievement-badge" class="px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black">0%</span>
+                </button>
+
+                <!-- NEW: Background Music Control Button -->
+                <button id="btn-music-toggle" type="button" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all active:scale-95 text-sky-400 hover:text-sky-300">
+                    <span id="music-icon">🔇</span>
+                    <span id="music-text">Music Off</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center md:items-end">
+            <div id="display-money" class="text-3xl md:text-4xl font-black text-white drop-shadow-md tabular-nums tracking-tight flex items-center">
+                $10.0
+            </div>
+            <div class="text-sm font-semibold text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full mt-1 flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                <span id="display-income">+$0.0 / sec</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+        
+        <!-- Left Area: The Big Clicker -->
+        <section class="flex-1 relative flex flex-col items-center justify-center p-8 min-h-[40vh] lg:min-h-0 bg-gradient-to-b from-transparent to-slate-900/50">
+            
+            <!-- Glow background decor -->
+            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] md:w-[500px] h-[350px] md:h-[500px] bg-emerald-500/10 rounded-full blur-[100px] mix-blend-screen"></div>
+            </div>
+
+            <div class="z-10 text-center mb-6">
+                <p class="text-slate-400 font-medium mb-1">Earning Power</p>
+                <div class="text-2xl font-bold text-white bg-slate-800/80 px-6 py-2 rounded-2xl border border-slate-700/50 shadow-inner inline-flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"></path></svg>
+                    <span id="display-click-power">+$1.0 / click</span>
+                </div>
+                <div id="multiplier-tag" class="text-xs text-amber-400 font-semibold mt-2 hidden">
+                    Prestige Multiplier: <span id="prestige-mult-val">1.0</span>x
+                </div>
+            </div>
+
+            <!-- Click Button Area -->
+            <div class="relative">
+                <button
+                    id="clicker-button"
+                    type="button"
+                    class="relative group w-40 h-40 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 shadow-[0_0_80px_rgba(16,185,129,0.3)] hover:shadow-[0_0_120px_rgba(16,185,129,0.5)] transition-all duration-200 active:scale-95 flex items-center justify-center before:absolute before:inset-2 before:rounded-full before:border-2 before:border-white/20 before:border-dashed active:before:rotate-12 before:transition-transform"
+                >
+                    <svg class="w-18 h-18 md:w-24 md:h-24 text-slate-950 drop-shadow-lg group-hover:scale-110 transition-transform duration-200 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </button>
+
+                <!-- Container for Floating Texts -->
+                <div id="floating-container" class="absolute inset-0 pointer-events-none overflow-visible"></div>
+            </div>
+
+            <!-- Tiny Secret Developer Egg Tucked into Corner -->
+            <button id="dev-secret-egg" type="button" class="absolute bottom-4 left-4 text-[10px] text-slate-700 hover:text-emerald-500 transition-colors">
+                v1.4 - Dev Log
+            </button>
+
+        </section>
+
+        <!-- Right Area: Control Panel & Assets/Upgrades List -->
+        <section class="flex-1 lg:flex-none w-full lg:w-[450px] xl:w-[500px] glass-panel border-l-0 lg:border-l border-t lg:border-t-0 border-slate-800/50 flex flex-col z-10 shadow-2xl bg-slate-900/60 overflow-hidden">
+            
+            <!-- Tab Navigation -->
+            <div class="flex p-3 gap-2 bg-slate-950/50 backdrop-blur-md shrink-0">
+                <button
+                    id="tab-assets"
+                    type="button"
+                    class="flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-slate-800 text-white shadow-md border border-slate-700"
+                >
+                    <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    Assets
+                </button>
+                <button
+                    id="tab-upgrades"
+                    type="button"
+                    class="flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 relative"
+                >
+                    <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Upgrades
+                    <span id="upgrade-alert" class="hidden absolute top-3 right-4 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                </button>
+                <button
+                    id="tab-prestige"
+                    type="button"
+                    class="py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 relative hidden"
+                >
+                    <svg class="w-4 h-4 pointer-events-none text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17"></path></svg>
+                    Prestige
+                </button>
+            </div>
+
+            <!-- List Content Area with custom scrollbar -->
+            <div id="list-container" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+                <!-- Dynamic Content (Assets or Upgrades) gets injected here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- ACHIEVEMENTS MODAL DASHBOARD -->
+    <div id="achievements-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-2xl max-h-[85vh] rounded-3xl flex flex-col overflow-hidden shadow-2xl border border-slate-700/50">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-800/80 flex justify-between items-center bg-slate-950/50">
+                <div>
+                    <h2 class="text-2xl font-black text-amber-400 flex items-center gap-2">
+                        🏆 Empire Achievements
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Earn unique badges and claim your crown as a top business magnate.</p>
+                </div>
+                <button id="close-achievements" type="button" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 font-bold transition-all active:scale-90">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Achievement Progress Overview -->
+            <div class="p-6 bg-slate-900/40 border-b border-slate-800 flex flex-col md:flex-row gap-4 justify-between items-stretch shrink-0">
+                <div class="flex-1 bg-slate-950/40 rounded-xl p-3 border border-slate-800/50 flex flex-col justify-center">
+                    <div class="flex justify-between text-xs font-bold text-slate-300 mb-2">
+                        <span>Overall Completion</span>
+                        <span id="ach-completion-text" class="text-amber-400">0 / 51 (0%)</span>
+                    </div>
+                    <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-slate-800">
+                        <div id="ach-completion-bar" class="bg-gradient-to-r from-amber-500 to-yellow-300 h-full w-[0%] transition-all duration-500"></div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-400">
+                    <div class="bg-slate-950/40 p-2 rounded-lg border border-slate-850">
+                        Total Clicks: <span id="stats-clicks" class="text-white block font-bold text-sm">0</span>
+                    </div>
+                    <div class="bg-slate-950/40 p-2 rounded-lg border border-slate-850">
+                        Time Played: <span id="stats-time" class="text-white block font-bold text-sm">0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Toggle Bar -->
+            <div class="flex gap-1.5 p-3 overflow-x-auto custom-scrollbar shrink-0 border-b border-slate-800 bg-slate-950/30">
+                <button type="button" data-ach-cat="all" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all bg-amber-500/20 text-amber-400 border border-amber-500/30">All</button>
+                <button type="button" data-ach-cat="clicking" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200">🖱️ Clicking</button>
+                <button type="button" data-ach-cat="money" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200">💰 Money</button>
+                <button type="button" data-ach-cat="upgrades" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200">🏪 Upgrades</button>
+                <button type="button" data-ach-cat="passive" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200">🤖 Auto</button>
+                <button type="button" data-ach-cat="prestige" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200">⭐ Prestige</button>
+                <button type="button" data-ach-cat="streaks" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200">🔥 Streaks</button>
+                <button type="button" data-ach-cat="secrets" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200">🎁 Secrets</button>
+                <button type="button" data-ach-cat="time" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200">⏱️ Time</button>
+                <button type="button" data-ach-cat="progress" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200">🎮 Progress</button>
+                <button type="button" data-ach-cat="funny" class="px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200">😂 Meme</button>
+            </div>
+
+            <!-- Achievement Lists -->
+            <div id="achievements-list-container" class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-3 bg-slate-900/20">
+                <!-- Achievement Item Rows generated inside JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER (Slide-in popup alerts) -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none w-full max-w-sm"></div>
+
+    <!-- Game Logic -->
+    <script>
+        // --- GAME STATES & ASSETS ---
+        let money = 10; 
+        let totalEarned = 10;
+        let activeTab = 'businesses';
+        let tradeMode = 'buy'; // 'buy' or 'sell'
+        let tradeAmount = 1; // 1, 10, 100
+
+        // Custom stats tracking for Achievements
+        let statTotalClicks = 0;
+        let statTotalTimePlayed = 0; // in seconds
+        let statPrestigeCount = 0;
+        let statClicksThisSecond = 0;
+        let statMaxClicksInSecond = 0;
+        let statClicksLastFiveSec = 0;
+        let statConsecutiveNoBreaks = 0; // Tracker for clicks without pausing
+        let statAutoclickerUnlocked = false;
+        let statAutoIncomeEver = 0;
+
+        let lastClickTime = 0; // For detecting combo/streaks
+
+        // Click arrays to track rate speeds
+        let clickTimestamps = [];
+
+        // Achievement category filter
+        let currentAchFilter = 'all';
+
+        // Unlocked states for business visuals
+        const unlockedStates = [false, false, false, false, false, false, false];
+
+        // Business definitions
+        const businesses = [
+            { id: 'b1', name: 'Lemonade Stand', baseCost: 10, baseIncome: 1, count: 0, color: 'text-yellow-400', icon: `<path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path>` },
+            { id: 'b2', name: 'Shoe Shining', baseCost: 150, baseIncome: 10, count: 0, color: 'text-amber-600', icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5z" />` },
+            { id: 'b3', name: 'Food Truck', baseCost: 1800, baseIncome: 95, count: 0, color: 'text-orange-400', icon: `<path d="M14 18V6a2 2 0 00-2-2H4a2 2 0 00-2 2v11a1 1 0 001 1h2m10 0h2a1 1 0 001-1v-5l-3-3h-3m-6 8a2 2 0 11-4 0m14 0a2 2 0 11-4 0" />` },
+            { id: 'b4', name: 'Local Franchise', baseCost: 20000, baseIncome: 850, count: 0, color: 'text-red-400', icon: `<path d="M3 3h18v18H3z M9 9h6v6H9z" />` },
+            { id: 'b5', name: 'Tech Startup', baseCost: 350000, baseIncome: 12000, count: 0, color: 'text-blue-400', icon: `<path d="M4 6h16v10H4z M12 20h.01M9 16l3 4 3-4" />` },
+            { id: 'b6', name: 'Investment Bank', baseCost: 6500000, baseIncome: 150000, count: 0, color: 'text-emerald-400', icon: `<path d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3" />` },
+            { id: 'b7', name: 'Space Program', baseCost: 150000000, baseIncome: 2800000, count: 0, color: 'text-purple-400', icon: `<path d="M12 2L2 22l10-4 10 4L12 2z" />` }
+        ];
+
+        // Upgrade definitions
+        const upgrades = [
+            { id: 'u1', name: 'Espresso Machine', cost: 100, description: 'Click power x2', type: 'click', multiplier: 2, bought: false, iconPath: `<path d="M18 8h2a3 3 0 013 3v1a3 3 0 01-3 3h-2M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" />` },
+            { id: 'u2', name: 'Ergonomic Mouse', cost: 1000, description: 'Click power x5', type: 'click', multiplier: 5, bought: false, iconPath: `<path d="M12 2a6 6 0 00-6 6v8a6 6 0 0012 0V8a6 6 0 00-6-6zm0 4V2" />` },
+            { id: 'u3', name: 'Organic Lemons', cost: 2500, description: 'Lemonade Stand income x3', type: 'business', target: 'b1', multiplier: 3, bought: false, iconPath: `<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707" />` },
+            { id: 'u4', name: 'Viral Marketing', cost: 15000, description: 'All business income +25%', type: 'global', multiplier: 1.25, bought: false, iconPath: `<path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M11 5.882c0-.952.733-1.74 1.683-1.815a13.388 13.388 0 015.63 1.096c.928.435 1.517 1.365 1.517 2.385v5.7c0 1.02-.589 1.95-1.517 2.385a13.388 13.388 0 01-5.63 1.096c-.95-.075-1.683-.863-1.683-1.815V5.882z" />` },
+            { id: 'u5', name: 'Mechanical Keyboard', cost: 50000, description: 'Click power x10', type: 'click', multiplier: 10, bought: false, iconPath: `<path d="M13 10V3L4 14h7v7l9-11h-7z" />` },
+            { id: 'u6', name: 'AI Optimization', cost: 1000000, description: 'Tech Startup income x4', type: 'business', target: 'b5', multiplier: 4, bought: false, iconPath: `<path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />` },
+            { id: 'u7', name: 'Global Synergy', cost: 50000000, description: 'All business income +100%', type: 'global', multiplier: 2, bought: false, iconPath: `<path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />` }
+        ];
+
+        // --- MASTER ACHIEVEMENTS DEFINITIONS ---
+        const achievementsList = [
+            // CLICKING
+            { id: 'c1', name: 'First Click', desc: 'Make your first click', cat: 'clicking', unlocked: false, icon: '🖱️' },
+            { id: 'c2', name: 'Click Rookie', desc: 'Reach 100 manual clicks', cat: 'clicking', unlocked: false, icon: '🖱️' },
+            { id: 'c3', name: 'Click Enthusiast', desc: 'Reach 1,000 manual clicks', cat: 'clicking', unlocked: false, icon: '🖱️' },
+            { id: 'c4', name: 'Click Addict', desc: 'Reach 10,000 manual clicks', cat: 'clicking', unlocked: false, icon: '🖱️' },
+            { id: 'c5', name: 'Click Machine', desc: 'Reach 100,000 manual clicks', cat: 'clicking', unlocked: false, icon: '🖱️' },
+            { id: 'c6', name: 'Click God', desc: 'Reach 1,000,000 manual clicks', cat: 'clicking', unlocked: false, icon: '👑' },
+
+            // MONEY
+            { id: 'm1', name: 'First Cash', desc: 'Earn your first dollar', cat: 'money', unlocked: false, icon: '💵' },
+            { id: 'm2', name: 'Side Hustle', desc: 'Earn 1,000 total lifetime coins', cat: 'money', unlocked: false, icon: '💵' },
+            { id: 'm3', name: 'Big Spender', desc: 'Earn 10,000 total lifetime coins', cat: 'money', unlocked: false, icon: '💵' },
+            { id: 'm4', name: 'Millionaire', desc: 'Earn 1,000,000 total lifetime coins', cat: 'money', unlocked: false, icon: '💰' },
+            { id: 'm5', name: 'Billionaire', desc: 'Earn 1,000,000,000 total lifetime coins', cat: 'money', unlocked: false, icon: '💎' },
+            { id: 'm6', name: '“Why Am I Still Clicking?”', desc: 'Earn 10,000,000,000 lifetime coins', cat: 'money', unlocked: false, icon: '🦄' },
+
+            // UPGRADES
+            { id: 'up1', name: 'First Upgrade', desc: 'Buy your first upgrade', cat: 'upgrades', unlocked: false, icon: '🏪' },
+            { id: 'up2', name: 'Improving', desc: 'Acquire 5 different upgrades', cat: 'upgrades', unlocked: false, icon: '📈' },
+            { id: 'up3', name: 'Factory Mode', desc: 'Acquire all 7 empire upgrades', cat: 'upgrades', unlocked: false, icon: '🏭' },
+            { id: 'up4', name: 'Automation Nation', desc: 'Unlock passive income from standard assets', cat: 'upgrades', unlocked: false, icon: '🤖' },
+            { id: 'up5', name: 'Fully Optimized', desc: 'Buy 5 upgrades in total', cat: 'upgrades', unlocked: false, icon: '⭐' },
+
+            // AUTO INCOME
+            { id: 'p1', name: 'Passive Income', desc: 'Earn money without clicking', cat: 'passive', unlocked: false, icon: '🤖' },
+            { id: 'p2', name: 'Lazy Rich', desc: 'Reach $10,000 passive income per second', cat: 'passive', unlocked: false, icon: '🛋️' },
+            { id: 'p3', name: 'Sleeping Millionaire', desc: 'Earn over $1,000,000 automatically', cat: 'passive', unlocked: false, icon: '💤' },
+            { id: 'p4', name: '“The Game Plays Itself”', desc: 'Make auto-income 90% or more of your click value', cat: 'passive', unlocked: false, icon: '🎮' },
+
+            // PRESTIGE
+            { id: 'pr1', name: 'Fresh Start', desc: 'Acquire your first Prestige Level', cat: 'prestige', unlocked: false, icon: '✨' },
+            { id: 'pr2', name: 'Restarted… On Purpose', desc: 'Reset your empire once', cat: 'prestige', unlocked: false, icon: '🔄' },
+            { id: 'pr3', name: 'Power Reset', desc: 'Prestige 5 times', cat: 'prestige', unlocked: false, icon: '⚡' },
+            { id: 'pr4', name: 'Time Loop', desc: 'Prestige 10 times', cat: 'prestige', unlocked: false, icon: '⏳' },
+            { id: 'pr5', name: 'Infinite Growth', desc: 'Prestige 25 times', cat: 'prestige', unlocked: false, icon: '♾️' },
+            { id: 'pr6', name: 'Reality Breaker', desc: 'Prestige 100 times', cat: 'prestige', unlocked: false, icon: '🌌' },
+
+            // STREAKS
+            { id: 's1', name: 'Speed Clicker', desc: 'Hit 10 clicks in 1 second', cat: 'streaks', unlocked: false, icon: '🔥' },
+            { id: 's2', name: 'Insane Fingers', desc: 'Hit 40 clicks in 5 seconds', cat: 'streaks', unlocked: false, icon: '⚡' },
+            { id: 's3', name: 'No Breaks', desc: 'Click 150 times without pausing for over 3 seconds', cat: 'streaks', unlocked: false, icon: '🚀' },
+            { id: 's4', name: 'Combo King', desc: 'Maintain click rate of at least 2 clicks/sec for 15 seconds', cat: 'streaks', unlocked: false, icon: '👑' },
+
+            // RANDOM / SECRETS
+            { id: 'se1', name: 'Lucky Day', desc: 'Claim a Golden Coin event drop', cat: 'secrets', unlocked: false, icon: '🍀' },
+            { id: 'se2', name: 'Golden Moment', desc: 'Find and tap a Special Floating Golden Coin', cat: 'secrets', unlocked: false, icon: '🌟' },
+            { id: 'se3', name: 'Wrong Place, Right Time', desc: 'Switch tabs 15 times under 30 seconds', cat: 'secrets', unlocked: false, icon: '🚪' },
+            { id: 'se4', name: 'Easter Egg Hunter', desc: 'Find and click the secret dev version log', cat: 'secrets', unlocked: false, icon: '🥚' },
+            { id: 'se5', name: 'Developer’s Joke', desc: 'Read a hidden motivational dev joke', cat: 'secrets', unlocked: false, icon: '🎭' },
+
+            // TIME PLAYED
+            { id: 't1', name: 'Just Started', desc: 'Play for 1 minute total', cat: 'time', unlocked: false, icon: '⏱️' },
+            { id: 't2', name: 'Getting Comfortable', desc: 'Play for 10 minutes total', cat: 'time', unlocked: false, icon: '⏱️' },
+            { id: 't3', name: 'Dedication', desc: 'Play for 30 minutes total', cat: 'time', unlocked: false, icon: '⏱️' },
+            { id: 't4', name: 'No Life Mode', desc: 'Play for 2 hours total', cat: 'time', unlocked: false, icon: '🛋️' },
+            { id: 't5', name: '“Touch Grass”', desc: 'Play for 5 hours total', cat: 'time', unlocked: false, icon: '🌱' },
+
+            // PROGRESS
+            { id: 'pg1', name: 'First Steps', desc: 'Own 1 asset of any type', cat: 'progress', unlocked: false, icon: '🚶' },
+            { id: 'pg2', name: 'Progressing', desc: 'Own 10 Lemonade Stands', cat: 'progress', unlocked: false, icon: '🎒' },
+            { id: 'pg3', name: 'Expanding Empire', desc: 'Unlock the local franchise tier', cat: 'progress', unlocked: false, icon: '🗺️' },
+            { id: 'pg4', name: 'Mid Game', desc: 'Earn more than $10,000 coins', cat: 'progress', unlocked: false, icon: '🛡️' },
+            { id: 'pg5', name: 'End Game', desc: 'Buy at least one Space Program asset', cat: 'progress', unlocked: false, icon: '🚀' },
+
+            // MEME
+            { id: 'f1', name: 'Clicked Too Hard', desc: 'Click 30 times in 10 seconds', cat: 'funny', unlocked: false, icon: '😂' },
+            { id: 'f2', name: 'My Finger Hurts', desc: 'Reach 500 total clicks', cat: 'funny', unlocked: false, icon: '🩹' },
+            { id: 'f3', name: 'Why Am I Doing This', desc: 'Own 10 Lemonade Stands and 10 Shoe Shining businesses', cat: 'funny', unlocked: false, icon: '🤔' },
+            { id: 'f4', name: 'Send Help', desc: 'Own more than 100 total assets combined', cat: 'funny', unlocked: false, icon: '🚨' },
+            { id: 'f5', name: 'Definitely Not Addicted', desc: 'Open the achievements dashboard 5 times', cat: 'funny', unlocked: false, icon: '🎪' }
+        ];
+
+        // --- UTILITIES & GAME MATH ---
+        function formatMoney(num) {
+            if (num >= 1e12) return `$${(num / 1e12).toFixed(3)}T`;
+            if (num >= 1e9) return `$${(num / 1e9).toFixed(3)}B`;
+            if (num >= 1e6) return `$${(num / 1e6).toFixed(3)}M`;
+            if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}k`;
+            return `$${num.toFixed(1)}`;
+        }
+
+        function calculateBulkCost(baseCost, count, amount) {
+            return baseCost * Math.pow(1.15, count) * (Math.pow(1.15, amount) - 1) / 0.15;
+        }
+
+        function calculateBulkRefund(baseCost, count, amount) {
+            if (count < amount) return 0;
+            return 0.5 * calculateBulkCost(baseCost, count - amount, amount);
+        }
+
+        // --- BACKGROUND MUSIC & AUDIO SYNTH SEQUENCE ---
+        let audioCtx = null;
+        let musicPlaying = false;
+        let synthInterval = null;
+        
+        // Cozy relax chord cycle (Cmaj7 - Am7 - Fmaj7 - G6)
+        const musicChords = [
+            [261.63, 329.63, 392.00, 493.88], // Cmaj7
+            [220.00, 261.63, 329.63, 392.00], // Am7
+            [174.61, 220.00, 261.63, 349.23], // Fmaj7
+            [196.00, 246.94, 293.66, 392.00]  // G6
+        ];
+        let currentChordIndex = 0;
+        let step = 0;
+
+        function startMusic() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            musicPlaying = true;
+            
+            let tempo = 120; // 120 Beats Per Minute
+            let stepDuration = 60 / tempo / 2; // 0.25 seconds per note step
+
+            let nextNoteTime = audioCtx.currentTime;
+
+            function playStep() {
+                if (!musicPlaying) return;
+                
+                let chord = musicChords[currentChordIndex];
+                let noteFreq = chord[step % chord.length];
+                
+                // Construct a smooth chiptune synthesiser step
+                let osc = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+                
+                osc.type = 'triangle'; // warm cozy sound waves
+                osc.frequency.value = noteFreq;
+                
+                gainNode.gain.setValueAtTime(0, nextNoteTime);
+                // Lower default sound volume to be extremely pleasant, quiet and comfortable
+                gainNode.gain.linearRampToValueAtTime(0.012, nextNoteTime + 0.05); 
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, nextNoteTime + stepDuration * 1.5);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start(nextNoteTime);
+                osc.stop(nextNoteTime + stepDuration * 1.5);
+                
+                step++;
+                if (step % 8 === 0) {
+                    currentChordIndex = (currentChordIndex + 1) % musicChords.length;
+                }
+                
+                nextNoteTime += stepDuration;
+                
+                let delay = (nextNoteTime - audioCtx.currentTime) * 1000;
+                synthInterval = setTimeout(playStep, Math.max(0, delay));
+            }
+            
+            playStep();
+        }
+
+        function stopMusic() {
+            musicPlaying = false;
+            clearTimeout(synthInterval);
+        }
+
+        // --- SOUND EFFECTS (Sleek procedurally generated Audio) ---
+        function playChime() {
+            try {
+                // Share the same audio context if initiated
+                let effectCtx = audioCtx;
+                if (!effectCtx) {
+                    effectCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (effectCtx.state === 'suspended') {
+                    effectCtx.resume();
+                }
+                
+                const osc = effectCtx.createOscillator();
+                const gain = effectCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.connect(gain);
+                gain.connect(effectCtx.destination);
+                
+                // Achievement beautiful dual bell chime
+                const now = effectCtx.currentTime;
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.15, now + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                
+                osc.start(now);
+                osc.stop(now + 0.8);
+
+                // High third harmony
+                const osc2 = effectCtx.createOscillator();
+                const gain2 = effectCtx.createGain();
+                osc2.type = 'sine';
+                osc2.connect(gain2);
+                gain2.connect(effectCtx.destination);
+                osc2.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                gain2.gain.setValueAtTime(0, now + 0.08);
+                gain2.gain.linearRampToValueAtTime(0.1, now + 0.12);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                osc2.start(now + 0.08);
+                osc2.stop(now + 0.8);
+            } catch(e) {
+                // AudioContext not allowed or not supported; fail silently.
+            }
+        }
+
+        // --- PRESTIGE RESET CAPABILITIES ---
+        function getPrestigeMultiplier() {
+            return 1.0 + (statPrestigeCount * 0.10); // +10% earnings boost per level
+        }
+
+        function checkPrestigeEligibility() {
+            // Unlocks Prestige tab permanently if lifetime earned coins is >= 1,000,000
+            if (totalEarned >= 1000000) {
+                document.getElementById('tab-prestige').classList.remove('hidden');
+            }
+        }
+
+        function executePrestige() {
+            if (money < 1000000) return;
+            
+            statPrestigeCount++;
+            money = 10;
+            
+            // Reset assets & counters
+            businesses.forEach(b => b.count = 0);
+            upgrades.forEach(u => u.bought = false);
+            
+            // Re-render UI
+            renderListStructure();
+            playChime();
+            
+            // Achievement Triggers
+            triggerAchievement('pr1'); // Fresh start
+            triggerAchievement('pr2'); // Restarted... On Purpose
+            if (statPrestigeCount >= 5) triggerAchievement('pr3');
+            if (statPrestigeCount >= 10) triggerAchievement('pr4');
+            if (statPrestigeCount >= 25) triggerAchievement('pr5');
+            if (statPrestigeCount >= 100) triggerAchievement('pr6');
+
+            showUnlockToast("✨ Prestige Complete!", `Level increased to ${statPrestigeCount}! Permanent +${(statPrestigeCount*10)}% global multiplier active.`);
+        }
+
+        // --- ACHIEVEMENT MANAGEMENT ---
+        function triggerAchievement(id) {
+            const ach = achievementsList.find(a => a.id === id);
+            if (ach && !ach.unlocked) {
+                ach.unlocked = true;
+                showUnlockToast(ach.name, ach.desc, ach.icon);
+                playChime();
+                updateAchievementHeaderProgress();
+            }
+        }
+
+        function showUnlockToast(title, desc, icon = '🏆') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = "animate-toast flex items-center gap-3 p-4 bg-slate-900/95 border border-amber-500/30 rounded-2xl shadow-[0_4px_30px_rgba(245,158,11,0.2)] backdrop-blur-md pointer-events-auto select-none";
+            toast.innerHTML = `
+                <div class="text-3xl">${icon}</div>
+                <div class="flex-1">
+                    <p class="text-[10px] text-amber-400 font-extrabold tracking-widest uppercase">ACHIEVEMENT UNLOCKED!</p>
+                    <h4 class="text-sm font-bold text-white mt-0.5">${title}</h4>
+                    <p class="text-xs text-slate-300 mt-0.5 leading-tight">${desc}</p>
+                </div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('transition-all', 'duration-500', 'opacity-0', 'translate-y-[-20px]');
+                setTimeout(() => toast.remove(), 500);
+            }, 4500);
+        }
+
+        function updateAchievementHeaderProgress() {
+            const total = achievementsList.length;
+            const unlockedCount = achievementsList.filter(a => a.unlocked).length;
+            const pct = Math.round((unlockedCount / total) * 100);
+            
+            // Update UI elements
+            document.getElementById('achievement-badge').innerText = `${pct}%`;
+            document.getElementById('ach-completion-text').innerText = `${unlockedCount} / ${total} (${pct}%)`;
+            document.getElementById('ach-completion-bar').style.width = `${pct}%`;
+            
+            // Stats
+            document.getElementById('stats-clicks').innerText = statTotalClicks;
+        }
+
+        // --- ACHIEVEMENT EVALUATION SYSTEM ---
+        let lastTabSwitchTime = 0;
+        let tabSwitchCountInWindow = 0;
+
+        function runContinuousAchChecks() {
+            // 1. Money Milestones
+            if (totalEarned >= 1) triggerAchievement('m1');
+            if (totalEarned >= 1000) triggerAchievement('m2');
+            if (totalEarned >= 10000) {
+                triggerAchievement('m3');
+                triggerAchievement('pg4');
+            }
+            if (totalEarned >= 1000000) triggerAchievement('m4');
+            if (totalEarned >= 1000000000) triggerAchievement('m5');
+            if (totalEarned >= 10000000000) triggerAchievement('m6');
+
+            // 2. Upgrades Completed Count
+            const upgradesCount = upgrades.filter(u => u.bought).length;
+            if (upgradesCount >= 1) triggerAchievement('up1');
+            if (upgradesCount >= 3) triggerAchievement('pg3');
+            if (upgradesCount >= 5) {
+                triggerAchievement('up2');
+                triggerAchievement('up5');
+            }
+            if (upgradesCount >= 7) triggerAchievement('up3');
+
+            // 3. Auto Income checks
+            const multipliers = getGameMultipliers();
+            if (multipliers.passiveIncome > 0) {
+                triggerAchievement('p1');
+                triggerAchievement('up4');
+            }
+            if (multipliers.passiveIncome >= 10000) triggerAchievement('p2');
+            
+            if (multipliers.passiveIncome >= multipliers.clickValue * 0.90) {
+                triggerAchievement('p4'); // Auto income is 90%+ of click
+            }
+
+            // 4. Time Played milestones
+            if (statTotalTimePlayed >= 60) triggerAchievement('t1');
+            if (statTotalTimePlayed >= 600) triggerAchievement('t2');
+            if (statTotalTimePlayed >= 1800) triggerAchievement('t3');
+            if (statTotalTimePlayed >= 7200) triggerAchievement('t4');
+            if (statTotalTimePlayed >= 18000) triggerAchievement('t5');
+
+            // 5. Progress Milestones
+            const totalAssetsCombined = businesses.reduce((sum, b) => sum + b.count, 0);
+            if (totalAssetsCombined >= 1) triggerAchievement('pg1');
+            if (totalAssetsCombined > 100) triggerAchievement('f4');
+
+            if (businesses[0].count >= 10) triggerAchievement('pg2');
+            if (businesses[3].count > 0 || totalEarned >= 20000) triggerAchievement('pg3');
+            if (businesses[6].count >= 1) triggerAchievement('pg5');
+
+            // 6. Funny Meme Combos
+            if (businesses[0].count >= 10 && businesses[1].count >= 10) triggerAchievement('f3');
+
+            // Set multipliers label display
+            const prestigeTag = document.getElementById('multiplier-tag');
+            if (statPrestigeCount > 0) {
+                prestigeTag.classList.remove('hidden');
+                document.getElementById('prestige-mult-val').innerText = getPrestigeMultiplier().toFixed(2);
+            }
+        }
+
+        // --- RANDOM FLOATING COIN SYSTEM (GOLDEN EVENTS) ---
+        function spawnGoldenCoin() {
+            // Prevent spawning duplicates
+            if (document.getElementById('golden-coin')) return;
+
+            const coin = document.createElement('button');
+            coin.id = 'golden-coin';
+            coin.type = 'button';
+            coin.className = "fixed z-40 animate-golden w-16 h-16 rounded-full bg-gradient-to-br from-yellow-300 via-amber-400 to-yellow-600 border-4 border-yellow-200 flex items-center justify-center text-2xl shadow-[0_0_30px_rgba(245,158,11,0.6)] cursor-pointer select-none active:scale-95";
+            
+            // Random horizontal placement
+            const randomX = Math.floor(Math.random() * 80) + 10; // between 10% and 90%
+            coin.style.left = `${randomX}vw`;
+            coin.style.bottom = `-15vh`;
+            coin.innerHTML = `🌟`;
+
+            coin.addEventListener('click', () => {
+                const rawBonus = getGameMultipliers().clickValue * 15;
+                const bonus = Math.max(150, rawBonus);
+                money += bonus;
+                totalEarned += bonus;
+                
+                // Show floating text directly on location
+                const rect = coin.getBoundingClientRect();
+                createFloatingText(rect.left + 30, rect.top, `+$${formatMoney(bonus)}!`);
+
+                triggerAchievement('se1'); // Lucky Day
+                triggerAchievement('se2'); // Golden Moment
+                playChime();
+                coin.remove();
+            });
+
+            document.body.appendChild(coin);
+
+            // Auto clean up after animation ends
+            setTimeout(() => {
+                if (coin.parentNode) {
+                    coin.remove();
+                }
+            }, 8200);
+        }
+
+        // --- SECOND-BASED METRIC INCREMENTS (1-Second Interval updates) ---
+        setInterval(() => {
+            statTotalTimePlayed++;
+            document.getElementById('stats-time').innerText = `${statTotalTimePlayed}s`;
+
+            // Evaluate Click rates
+            statClicksThisSecond = clickTimestamps.filter(t => Date.now() - t < 1000).length;
+            statClicksLastFiveSec = clickTimestamps.filter(t => Date.now() - t < 5000).length;
+
+            if (statClicksThisSecond > statMaxClicksInSecond) {
+                statMaxClicksInSecond = statClicksThisSecond;
+            }
+
+            // Streak/Combo Checkers
+            if (statClicksThisSecond >= 10) triggerAchievement('s1');
+            if (statClicksLastFiveSec >= 40) triggerAchievement('s2');
+
+            // Auto income passive AFK accumulator track
+            const currentIncome = getGameMultipliers().passiveIncome;
+            if (currentIncome > 0) {
+                statAutoIncomeEver += currentIncome;
+                if (statAutoIncomeEver >= 1000000) triggerAchievement('p3');
+            }
+
+            // Periodically check achievements
+            runContinuousAchChecks();
+
+            // Random chance to spawn Golden Coin (Approx 2% chance every second)
+            if (Math.random() < 0.02) {
+                spawnGoldenCoin();
+            }
+
+            // Auto reset no-breaks tracker if not clicked for > 3 seconds
+            if (Date.now() - lastClickTime > 3000) {
+                statConsecutiveNoBreaks = 0;
+            }
+        }, 1000);
+
+        // --- STREAK COMBO ACCURACY EVALUATION (15s Combo King) ---
+        let streakTimeCounter = 0;
+        setInterval(() => {
+            const clicksInLastSecond = clickTimestamps.filter(t => Date.now() - t < 1000).length;
+            if (clicksInLastSecond >= 2) {
+                streakTimeCounter++;
+                if (streakTimeCounter >= 15) {
+                    triggerAchievement('s4'); // Combo King
+                }
+            } else {
+                streakTimeCounter = 0;
+            }
+        }, 1000);
+
+        // --- GEOMETRIC SYSTEM FOR BUSINESSES ---
+        function getGameMultipliers() {
+            let pIncome = 0;
+            let cValue = 1;
+            let globalMultiplier = getPrestigeMultiplier();
+
+            businesses.forEach(biz => {
+                let bizIncome = biz.baseIncome * biz.count;
+                upgrades.forEach(upg => {
+                    if (upg.bought && upg.type === 'business' && upg.target === biz.id) {
+                        bizIncome *= upg.multiplier;
+                    }
+                });
+                pIncome += bizIncome;
+            });
+
+            upgrades.forEach(upg => {
+                if (upg.bought && upg.type === 'global') {
+                    globalMultiplier *= upg.multiplier;
+                }
+                if (upg.bought && upg.type === 'click') {
+                    cValue *= upg.multiplier;
+                }
+            });
+
+            return {
+                passiveIncome: pIncome * globalMultiplier,
+                clickValue: cValue * getPrestigeMultiplier()
+            };
+        }
+
+        // --- MAIN TIME LOOP ---
+        let lastTime = Date.now();
+        function gameLoop() {
+            const now = Date.now();
+            const delta = (now - lastTime) / 1000;
+            lastTime = now;
+
+            const multipliers = getGameMultipliers();
+            if (multipliers.passiveIncome > 0) {
+                const gained = multipliers.passiveIncome * delta;
+                money += gained;
+                totalEarned += gained;
+            }
+
+            checkPrestigeEligibility();
+            updateUIHeader(multipliers);
+            updateDynamicUIStates(); 
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- CORE UI HEADER UPDATES ---
+        const displayMoney = document.getElementById('display-money');
+        const displayIncome = document.getElementById('display-income');
+        const displayClickPower = document.getElementById('display-click-power');
+        const listContainer = document.getElementById('list-container');
+        const upgradeAlert = document.getElementById('upgrade-alert');
+
+        function updateUIHeader(multipliers) {
+            displayMoney.innerText = formatMoney(money);
+            displayIncome.innerText = `+${formatMoney(multipliers.passiveIncome)} / sec`;
+            displayClickPower.innerText = `+${formatMoney(multipliers.clickValue)} / click`;
+
+            const unboughtAffordableUpgrade = upgrades.some(u => !u.bought && money >= u.cost);
+            if (unboughtAffordableUpgrade) {
+                upgradeAlert.classList.remove('hidden');
+            } else {
+                upgradeAlert.classList.add('hidden');
+            }
+        }
+
+        // Structural UI setup
+        function renderListStructure() {
+            if (activeTab === 'businesses') {
+                renderBusinessesTab();
+            } else if (activeTab === 'upgrades') {
+                renderUpgradesTab();
+            } else {
+                renderPrestigeTab();
+            }
+        }
+
+        function renderBusinessesTab() {
+            let html = `
+                <!-- Buy/Sell Bulk Control Panel -->
+                <div class="flex items-center justify-between bg-slate-900/50 p-2 rounded-xl border border-slate-800 mb-4 shadow-inner shrink-0">
+                    <div class="flex gap-1 bg-slate-950 p-1 rounded-lg">
+                        <button type="button" data-action="set-mode" data-value="buy" class="px-3 py-1 text-sm font-bold rounded-md transition-all active:scale-95 ${tradeMode === 'buy' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-500 hover:text-slate-300'}">
+                            <span class="pointer-events-none">Buy</span>
+                        </button>
+                        <button type="button" data-action="set-mode" data-value="sell" class="px-3 py-1 text-sm font-bold rounded-md transition-all active:scale-95 ${tradeMode === 'sell' ? 'bg-red-500/20 text-red-400' : 'text-slate-500 hover:text-slate-300'}">
+                            <span class="pointer-events-none">Sell</span>
+                        </button>
+                    </div>
+                    <div class="flex gap-1 bg-slate-950 p-1 rounded-lg">
+                        <button type="button" data-action="set-amount" data-value="1" class="px-3 py-1 text-sm font-bold rounded-md transition-all active:scale-95 ${tradeAmount === 1 ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'}">
+                            <span class="pointer-events-none">x1</span>
+                        </button>
+                        <button type="button" data-action="set-amount" data-value="10" class="px-3 py-1 text-sm font-bold rounded-md transition-all active:scale-95 ${tradeAmount === 10 ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'}">
+                            <span class="pointer-events-none">x10</span>
+                        </button>
+                        <button type="button" data-action="set-amount" data-value="100" class="px-3 py-1 text-sm font-bold rounded-md transition-all active:scale-95 ${tradeAmount === 100 ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'}">
+                            <span class="pointer-events-none">x100</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-3 pb-8">
+            `;
+
+            businesses.forEach((biz, index) => {
+                const isUnlocked = biz.count > 0 || money >= (biz.baseCost * 0.5) || index === 0;
+                unlockedStates[index] = isUnlocked;
+
+                if (!isUnlocked) {
+                    html += `
+                        <div id="biz-card-${index}" class="p-4 rounded-2xl bg-slate-800/20 border border-slate-800 flex items-center justify-center gap-3 text-slate-600 h-24">
+                            <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            <span class="font-semibold text-sm pointer-events-none">Discover at ${formatMoney(biz.baseCost)}</span>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const cost = tradeMode === 'buy' 
+                    ? calculateBulkCost(biz.baseCost, biz.count, tradeAmount)
+                    : calculateBulkRefund(biz.baseCost, biz.count, tradeAmount);
+
+                html += `
+                    <button
+                        type="button"
+                        data-action="trade"
+                        data-index="${index}"
+                        id="biz-card-${index}"
+                        class="w-full text-left p-4 rounded-2xl border transition-all duration-150 active:scale-[0.98] flex items-center gap-4 select-none bg-slate-900/40 border-slate-800 opacity-40 cursor-default"
+                    >
+                        <div id="biz-icon-wrap-${index}" class="w-14 h-14 rounded-xl flex items-center justify-center shadow-inner bg-slate-950 pointer-events-none">
+                            <svg class="w-7 h-7 ${biz.color} pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                ${biz.icon}
+                            </svg>
+                        </div>
+                        
+                        <div class="flex-1 pointer-events-none">
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-base text-slate-400">
+                                    ${biz.name}
+                                </h3>
+                                <div id="biz-count-${index}" class="text-2xl font-black text-slate-700 bg-slate-950 px-3 py-0.5 rounded-lg border border-slate-800/50">
+                                    ${biz.count}
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between items-end mt-2">
+                                <span id="biz-cost-${index}" class="font-mono font-bold text-red-400/80">
+                                    ${tradeMode === 'buy' ? '-' : '+'}${formatMoney(cost)}
+                                </span>
+                                <span class="text-xs font-semibold text-slate-400 bg-slate-800 px-2 py-1 rounded">
+                                    +${formatMoney(biz.baseIncome)}/s
+                                </span>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            });
+
+            html += '</div>';
+            listContainer.innerHTML = html;
+        }
+
+        function renderUpgradesTab() {
+            let html = '<div class="grid grid-cols-1 gap-3 pb-8">';
+
+            upgrades.forEach((upg, index) => {
+                if (upg.bought) {
+                    html += `
+                        <div class="p-4 rounded-2xl bg-emerald-900/20 border border-emerald-800/30 flex items-center gap-4 opacity-70">
+                            <div class="w-12 h-12 rounded-full bg-emerald-900/50 flex items-center justify-center text-emerald-400 pointer-events-none">
+                                <svg class="w-6 h-6 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                            <div class="pointer-events-none">
+                                <h3 class="font-bold text-emerald-100 line-through decoration-emerald-500/50">${upg.name}</h3>
+                                <p class="text-xs text-emerald-500 font-medium mt-0.5">${upg.description}</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const isVisible = money >= (upg.cost * 0.2);
+                if (!isVisible) return;
+
+                html += `
+                    <button
+                        type="button"
+                        data-action="upgrade"
+                        data-index="${index}"
+                        id="upg-card-${index}"
+                        class="w-full text-left p-4 rounded-2xl border transition-all duration-150 active:scale-[0.98] flex items-center gap-4 select-none bg-slate-900/40 border-slate-800 opacity-40 cursor-default"
+                    >
+                        <div id="upg-icon-wrap-${index}" class="w-12 h-12 rounded-full flex items-center justify-center pointer-events-none bg-slate-900">
+                            <svg class="w-6 h-6 text-slate-600 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                ${upg.iconPath}
+                            </svg>
+                        </div>
+                        
+                        <div class="flex-1 pointer-events-none">
+                            <h3 class="font-bold text-slate-400">
+                                ${upg.name}
+                            </h3>
+                            <p class="text-xs text-amber-200/70 font-medium mt-0.5 mb-2 leading-tight">
+                                ${upg.description}
+                            </p>
+                            <span id="upg-cost-${index}" class="font-mono font-bold text-sm bg-slate-950/50 px-2 py-1 rounded inline-block text-red-400/80">
+                                ${formatMoney(upg.cost)}
+                            </span>
+                        </div>
+                    </button>
+                `;
+            });
+
+            if (upgrades.every(u => u.bought)) {
+                html += `
+                    <div class="text-center p-8 text-slate-500 font-medium pointer-events-none">
+                        All upgrades bought! Outstanding work!
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            listContainer.innerHTML = html;
+        }
+
+        function renderPrestigeTab() {
+            const hasEnough = money >= 1000000;
+            const boostPercentage = (statPrestigeCount + 1) * 10;
+            
+            listContainer.innerHTML = `
+                <div class="p-6 bg-slate-900/40 border border-slate-850 rounded-2xl space-y-4 shadow-xl">
+                    <h3 class="text-xl font-extrabold text-purple-400 flex items-center gap-2">
+                        ✨ Reset Reality (Prestige)
+                    </h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Prestige forces you to sell all current assets and upgrades, resetting your money back to $10.0 in exchange for permanent cosmic mastery.
+                    </p>
+                    <div class="bg-slate-950 p-4 rounded-xl space-y-2 border border-slate-850">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-slate-400">Your Prestige Level:</span>
+                            <span class="text-white font-bold">${statPrestigeCount}</span>
+                        </div>
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-slate-400">Current Income Multiplier:</span>
+                            <span class="text-amber-400 font-bold">${getPrestigeMultiplier().toFixed(2)}x</span>
+                        </div>
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-slate-400">Next Level Multiplier:</span>
+                            <span class="text-emerald-400 font-bold">${(getPrestigeMultiplier() + 0.1).toFixed(2)}x (+10%)</span>
+                        </div>
+                    </div>
+
+                    <button 
+                        id="btn-trigger-prestige"
+                        type="button" 
+                        class="w-full py-4 rounded-xl font-bold transition-all flex justify-center items-center gap-2 active:scale-95 ${
+                            hasEnough 
+                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-lg shadow-purple-900/30 text-white cursor-pointer' 
+                                : 'bg-slate-950/80 border border-slate-800 text-slate-500 cursor-default'
+                        }"
+                    >
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4M4 19h4m12-4v4m-2-2h4m-12-7h.01M16 8h.01M13 12h.01M21 21M3 21"></path></svg>
+                        <span>${hasEnough ? 'PRESTIGE NOW!' : 'Locked (Needs $1.00M)'}</span>
+                    </button>
+                    ${!hasEnough ? `<p class="text-[10px] text-red-400 font-medium text-center">Generate ${formatMoney(1000000 - money)} more to qualify!</p>` : ''}
+                </div>
+            `;
+
+            // Setup local click handler for Prestige button
+            const prestigeBtn = document.getElementById('btn-trigger-prestige');
+            if (prestigeBtn && hasEnough) {
+                prestigeBtn.addEventListener('click', executePrestige);
+            }
+        }
+
+        // --- DYNAMIC CARD STATE HANDLER (Smooth frame state transitions) ---
+        function updateDynamicUIStates() {
+            if (activeTab === 'businesses') {
+                let needsRebuild = false;
+                businesses.forEach((biz, index) => {
+                    const isUnlocked = biz.count > 0 || money >= (biz.baseCost * 0.5) || index === 0;
+                    if (isUnlocked !== unlockedStates[index]) {
+                        needsRebuild = true;
+                    }
+                });
+                if (needsRebuild) {
+                    renderListStructure();
+                    return;
+                }
+
+                businesses.forEach((biz, index) => {
+                    const card = document.getElementById(`biz-card-${index}`);
+                    if (!card || card.tagName.toLowerCase() === 'div') return; 
+
+                    const cost = tradeMode === 'buy' 
+                        ? calculateBulkCost(biz.baseCost, biz.count, tradeAmount)
+                        : calculateBulkRefund(biz.baseCost, biz.count, tradeAmount);
+
+                    const canTrade = tradeMode === 'buy' ? money >= cost : biz.count >= tradeAmount;
+
+                    const costEl = document.getElementById(`biz-cost-${index}`);
+                    if (costEl) {
+                        costEl.innerText = `${tradeMode === 'buy' ? '-' : '+'}${formatMoney(cost)}`;
+                        costEl.className = canTrade 
+                            ? `font-mono font-bold ${tradeMode === 'buy' ? 'text-emerald-400' : 'text-amber-400'}`
+                            : 'font-mono font-bold text-red-400/80';
+                    }
+
+                    card.className = canTrade 
+                        ? 'w-full text-left p-4 rounded-2xl border transition-all duration-150 active:scale-[0.98] flex items-center gap-4 select-none bg-slate-800/80 hover:bg-slate-700 hover:border-slate-500 border-slate-700 cursor-pointer shadow-lg' 
+                        : 'w-full text-left p-4 rounded-2xl border transition-all duration-150 active:scale-[0.98] flex items-center gap-4 select-none bg-slate-900/40 border-slate-800 opacity-40 cursor-default';
+
+                    const iconWrap = document.getElementById(`biz-icon-wrap-${index}`);
+                    if (iconWrap) {
+                        iconWrap.className = `w-14 h-14 rounded-xl flex items-center justify-center shadow-inner pointer-events-none ${canTrade ? 'bg-slate-900/80' : 'bg-slate-950'}`;
+                    }
+
+                    const titleEl = card.querySelector('h3');
+                    if (titleEl) {
+                        titleEl.className = `font-bold text-base ${canTrade ? 'text-slate-100' : 'text-slate-400'}`;
+                    }
+                });
+            } else if (activeTab === 'upgrades') {
+                let needsRebuild = false;
+                upgrades.forEach((upg, index) => {
+                    if (!upg.bought) {
+                        const isVisible = money >= (upg.cost * 0.2);
+                        const cardExists = document.getElementById(`upg-card-${index}`);
+                        if (isVisible && !cardExists) {
+                            needsRebuild = true;
+                        }
+                    }
+                });
+                if (needsRebuild) {
+                    renderListStructure();
+                    return;
+                }
+
+                upgrades.forEach((upg, index) => {
+                    const card = document.getElementById(`upg-card-${index}`);
+                    if (!card) return;
+
+                    const canAfford = money >= upg.cost;
+
+                    const costEl = document.getElementById(`upg-cost-${index}`);
+                    if (costEl) {
+                        costEl.className = canAfford 
+                            ? 'font-mono font-bold text-sm bg-slate-950/50 px-2 py-1 rounded inline-block text-amber-400' 
+                            : 'font-mono font-bold text-sm bg-slate-950/50 px-2 py-1 rounded inline-block text-red-400/80';
+                    }
+
+                    card.className = canAfford 
+                        ? 'w-full text-left p-4 rounded-2xl border transition-all duration-150 active:scale-[0.98] flex items-center gap-4 select-none bg-slate-800/80 hover:bg-slate-700 border-slate-600 hover:border-emerald-500/50 cursor-pointer shadow-lg' 
+                        : 'w-full text-left p-4 rounded-2xl border transition-all duration-150 active:scale-[0.98] flex items-center gap-4 select-none bg-slate-900/40 border-slate-800 opacity-40 cursor-default';
+
+                    const iconWrap = document.getElementById(`upg-icon-wrap-${index}`);
+                    if (iconWrap) {
+                        iconWrap.className = `w-12 h-12 rounded-full flex items-center justify-center pointer-events-none ${canAfford ? 'bg-gradient-to-br from-slate-700 to-slate-800 shadow-inner' : 'bg-slate-900'}`;
+                        const svgEl = iconWrap.querySelector('svg');
+                        if (svgEl) {
+                            svgEl.className = `w-6 h-6 ${canAfford ? 'text-amber-400' : 'text-slate-600'} pointer-events-none`;
+                        }
+                    }
+
+                    const titleEl = card.querySelector('h3');
+                    if (titleEl) {
+                        titleEl.className = `font-bold ${canAfford ? 'text-white' : 'text-slate-400'}`;
+                    }
+                });
+            }
+        }
+
+        // --- ACHIEVEMENTS RENDER DASHBOARD ---
+        function renderAchievementsList() {
+            const listContainer = document.getElementById('achievements-list-container');
+            listContainer.innerHTML = '';
+
+            const filtered = currentAchFilter === 'all' 
+                ? achievementsList 
+                : achievementsList.filter(a => a.cat === currentAchFilter);
+
+            filtered.forEach(ach => {
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl flex items-center gap-4 border select-none transition-all ${
+                    ach.unlocked 
+                        ? 'bg-slate-800/80 border-amber-500/30 shadow-lg shadow-amber-500/5' 
+                        : 'bg-slate-950/40 border-slate-850 opacity-50'
+                }`;
+
+                card.innerHTML = `
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-slate-900/80 shadow-inner border border-slate-800">
+                        ${ach.unlocked ? ach.icon : '🔒'}
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-sm ${ach.unlocked ? 'text-amber-400' : 'text-slate-400'}">${ach.name}</h4>
+                        <p class="text-xs text-slate-300 mt-0.5 leading-tight">${ach.desc}</p>
+                    </div>
+                    <div class="text-right">
+                        ${ach.unlocked 
+                            ? '<span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-1 rounded-md font-black tracking-wider uppercase">Unlocked</span>' 
+                            : '<span class="text-[10px] bg-slate-900 text-slate-600 px-2 py-1 rounded-md font-bold uppercase">Locked</span>'
+                        }
+                    </div>
+                `;
+
+                listContainer.appendChild(card);
+            });
+        }
+
+        // Setup filter button interactions inside achievements modal
+        const catButtons = document.querySelectorAll('[data-ach-cat]');
+        catButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                catButtons.forEach(b => b.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all text-slate-400 hover:text-slate-200");
+                btn.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                currentAchFilter = btn.getAttribute('data-ach-cat');
+                renderAchievementsList();
+            });
+        });
+
+        // --- CLICK EVENTS INTERACTION DELEGATION ---
+        listContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+
+            const action = btn.getAttribute('data-action');
+            const index = parseInt(btn.getAttribute('data-index'), 10);
+            const value = btn.getAttribute('data-value');
+
+            if (action === 'trade') {
+                tradeBusiness(index);
+            } else if (action === 'upgrade') {
+                buyUpgrade(index);
+            } else if (action === 'set-mode') {
+                setTradeMode(value);
+            } else if (action === 'set-amount') {
+                setTradeAmount(parseInt(value, 10));
+            }
+        });
+
+        function setTradeMode(mode) {
+            tradeMode = mode;
+            renderListStructure();
+        }
+
+        function setTradeAmount(amount) {
+            tradeAmount = amount;
+            renderListStructure();
+        }
+
+        function tradeBusiness(index) {
+            const biz = businesses[index];
+            if (tradeMode === 'buy') {
+                const cost = calculateBulkCost(biz.baseCost, biz.count, tradeAmount);
+                if (money >= cost) {
+                    money -= cost;
+                    biz.count += tradeAmount;
+                    renderListStructure(); 
+                } else {
+                    triggerNudgeEffect();
+                }
+            } else {
+                if (biz.count >= tradeAmount) {
+                    const refund = calculateBulkRefund(biz.baseCost, biz.count, tradeAmount);
+                    money += refund;
+                    biz.count -= tradeAmount;
+                    renderListStructure();
+                } else {
+                    triggerNudgeEffect();
+                }
+            }
+        }
+
+        function buyUpgrade(index) {
+            const upg = upgrades[index];
+            if (money >= upg.cost && !upg.bought) {
+                money -= upg.cost;
+                upg.bought = true;
+                renderListStructure();
+            } else if (money < upg.cost) {
+                triggerNudgeEffect();
+            }
+        }
+
+        function triggerNudgeEffect() {
+            const element = document.getElementById('display-money');
+            element.classList.add('text-red-400');
+            setTimeout(() => {
+                element.classList.remove('text-red-400');
+            }, 250);
+        }
+
+        // --- THE BIG CLICKER ACTION ---
+        const clickerButton = document.getElementById('clicker-button');
+        const floatingContainer = document.getElementById('floating-container');
+
+        clickerButton.addEventListener('click', (e) => {
+            const multipliers = getGameMultipliers();
+            money += multipliers.clickValue;
+            totalEarned += multipliers.clickValue;
+
+            // Stats update
+            statTotalClicks++;
+            statConsecutiveNoBreaks++;
+            lastClickTime = Date.now();
+
+            // Track clicks array
+            clickTimestamps.push(Date.now());
+            // Filter timestamps older than 5 seconds
+            clickTimestamps = clickTimestamps.filter(t => Date.now() - t < 5000);
+
+            // Manual Clicks Achievement evaluations
+            triggerAchievement('c1'); // First Click
+            if (statTotalClicks >= 100) triggerAchievement('c2');
+            if (statTotalClicks >= 500) triggerAchievement('f2');
+            if (statTotalClicks >= 1000) triggerAchievement('c3');
+            if (statTotalClicks >= 10000) triggerAchievement('c4');
+            if (statTotalClicks >= 100000) triggerAchievement('c5');
+            if (statTotalClicks >= 1000000) triggerAchievement('c6');
+
+            // Streak/Speed click checkers
+            const clickRate10s = clickTimestamps.filter(t => Date.now() - t < 10000).length;
+            if (clickRate10s >= 30) triggerAchievement('f1'); // Clicked Too Hard
+
+            if (statConsecutiveNoBreaks >= 150) {
+                triggerAchievement('s3'); // No Breaks
+            }
+
+            // Float Click Number Feedback
+            const rect = clickerButton.getBoundingClientRect();
+            const x = e.clientX - rect.left + (Math.random() * 40 - 20);
+            const y = e.clientY - rect.top + (Math.random() * 40 - 20);
+
+            createFloatingText(x, y, `+$${formatMoney(multipliers.clickValue).replace('$','')}`);
+        });
+
+        function createFloatingText(x, y, textString) {
+            const floatDiv = document.createElement('div');
+            floatDiv.className = "absolute animate-float text-xl md:text-2xl font-black text-emerald-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] pointer-events-none select-none z-50 whitespace-nowrap";
+            floatDiv.style.left = `${x}px`;
+            floatDiv.style.top = `${y}px`;
+            floatDiv.innerText = textString;
+            
+            floatingContainer.appendChild(floatDiv);
+
+            setTimeout(() => {
+                floatDiv.remove();
+            }, 1000);
+        }
+
+        // --- EASTER EGG HUNTER ACTIVATION ---
+        const devSecretBtn = document.getElementById('dev-secret-egg');
+        devSecretBtn.addEventListener('click', () => {
+            triggerAchievement('se4'); // Easter Egg Hunter
+            
+            // Random jokes list (safe & wholesome for kids/all ages)
+            const motivationJokes = [
+                "Why don't scientists trust atoms? Because they make up everything!",
+                "What did the direct investment banker say to the lazy startup? Direct your capital assets elsewhere!",
+                "Why did the computer go to the dentist? Because it had a bad drive byte!",
+                "Why did the entrepreneur open a shoe shining stand next to the bank? She wanted clean steps to wealth!"
+            ];
+            const chosenJoke = motivationJokes[Math.floor(Math.random() * motivationJokes.length)];
+            
+            // Trigger motivational developer joke achievement
+            triggerAchievement('se5'); 
+
+            showUnlockToast("🎭 Developer Motivation Joke", chosenJoke);
+        });
+
+        // --- TAB NAVIGATION SWITCHING ---
+        const tabAssets = document.getElementById('tab-assets');
+        const tabUpgrades = document.getElementById('tab-upgrades');
+        const tabPrestige = document.getElementById('tab-prestige');
+
+        let tabSwitchesLastPeriod = 0;
+        function handleTabSwitch() {
+            tabSwitchesLastPeriod++;
+            if (tabSwitchesLastPeriod >= 15) {
+                triggerAchievement('se3'); // Wrong Place, Right Time
+            }
+            setTimeout(() => {
+                tabSwitchesLastPeriod = Math.max(0, tabSwitchesLastPeriod - 1);
+            }, 30000);
+        }
+
+        tabAssets.addEventListener('click', () => {
+            activeTab = 'businesses';
+            tabAssets.className = "flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-slate-800 text-white shadow-md border border-slate-700";
+            tabUpgrades.className = "flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 relative";
+            tabPrestige.className = "py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 relative";
+            handleTabSwitch();
+            renderListStructure();
+        });
+
+        tabUpgrades.addEventListener('click', () => {
+            activeTab = 'upgrades';
+            tabUpgrades.className = "flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-slate-800 text-white shadow-md border border-slate-700 relative";
+            tabAssets.className = "flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50";
+            tabPrestige.className = "py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 relative";
+            handleTabSwitch();
+            renderListStructure();
+        });
+
+        tabPrestige.addEventListener('click', () => {
+            activeTab = 'prestige';
+            tabPrestige.className = "py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-1.5 bg-slate-800 text-white shadow-md border border-slate-700 relative";
+            tabAssets.className = "flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50";
+            tabUpgrades.className = "flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 relative";
+            handleTabSwitch();
+            renderListStructure();
+        });
+
+        // --- MUSIC TOGGLE HANDLER ---
+        const btnMusicToggle = document.getElementById('btn-music-toggle');
+        const musicIcon = document.getElementById('music-icon');
+        const musicText = document.getElementById('music-text');
+
+        btnMusicToggle.addEventListener('click', () => {
+            if (!musicPlaying) {
+                startMusic();
+                musicIcon.innerText = "🔊";
+                musicText.innerText = "Music On";
+                btnMusicToggle.className = "px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-xs font-bold border border-sky-500/30 flex items-center gap-1.5 transition-all active:scale-95 text-sky-400";
+            } else {
+                stopMusic();
+                musicIcon.innerText = "🔇";
+                musicText.innerText = "Music Off";
+                btnMusicToggle.className = "px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all active:scale-95 text-sky-400 hover:text-sky-300";
+            }
+        });
+
+        // --- ACHIEVEMENTS OVERLAY TRIGGERS ---
+        const btnAchievements = document.getElementById('btn-achievements');
+        const modalAchievements = document.getElementById('achievements-modal');
+        const closeAchievements = document.getElementById('close-achievements');
+
+        let achievementOpenCount = 0;
+
+        btnAchievements.addEventListener('click', () => {
+            modalAchievements.classList.remove('hidden');
+            achievementOpenCount++;
+            if (achievementOpenCount >= 5) {
+                triggerAchievement('f5'); // Definitely Not Addicted
+            }
+            updateAchievementHeaderProgress();
+            renderAchievementsList();
+        });
+
+        closeAchievements.addEventListener('click', () => {
+            modalAchievements.classList.add('hidden');
+        });
+
+        // Render structure first, then initialize gameLoop
+        updateAchievementHeaderProgress();
+        renderListStructure();
+        gameLoop();
+    </script>
+</body>
+</html>
+    
+  </body>
+  
+</html>
