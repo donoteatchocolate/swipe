@@ -5,7 +5,6 @@ const games = [
     description: "Build a corporate empire one tap at a time and automate your way to billions.",
     category: "Strategy",
     featured: true,
-    trending: true,
     thumbnail: "💼",
     icon: "icons/business-clicker.svg",
     accent: "linear-gradient(135deg, #2dd4bf, #2563eb)",
@@ -17,7 +16,6 @@ const games = [
     description: "Jump into fast-paced battles, loot smart, and survive the chaos in a tiny arena.",
     category: "Action",
     featured: true,
-    trending: true,
     thumbnail: "⚔️",
     icon: "icons/tiny-royale.svg",
     accent: "linear-gradient(135deg, #fb923c, #ef4444)",
@@ -29,7 +27,6 @@ const games = [
     description: "Race through glowing city grids and master tight turns in a slick arcade sprint.",
     category: "Arcade",
     featured: false,
-    trending: true,
     thumbnail: "🏎️",
     icon: "icons/racer.svg",
     accent: "linear-gradient(135deg, #818cf8, #ec4899)",
@@ -41,7 +38,6 @@ const games = [
     description: "A cozy yet competitive adventure — gather, craft, and claim your crown.",
     category: "Arcade",
     featured: true,
-    trending: true,
     thumbnail: "🔥👑",
     icon: "icons/campfire-and-crown.svg",
     accent: "linear-gradient(135deg, #f97316, #f43f5e)",
@@ -53,7 +49,6 @@ const games = [
     description: "Chomp pizzas, dodge oven hazards, and grow into the ultimate pizza monster.",
     category: "Arcade",
     featured: true,
-    trending: true,
     thumbnail: "🍕",
     icon: "icons/pizza-monster.svg",
     accent: "linear-gradient(135deg, #f97316, #f59e0b)",
@@ -62,7 +57,7 @@ const games = [
 ];
 
 const featuredRoot = document.getElementById("featured-games");
-const trendingRoot = document.getElementById("trending-games");
+const allGamesRoot = document.getElementById("all-games");
 const categoryRoot = document.getElementById("category-filters");
 const searchInput = document.getElementById("search-input");
 const loadingScreen = document.getElementById("loading-screen");
@@ -99,7 +94,7 @@ function createCardMarkup(game) {
       <div class="thumb" style="background: ${game.accent}">${thumb}</div>
       <div class="card-meta">
         <span>${game.category}</span>
-        <span>${game.trending ? "Trending" : "Classic"}</span>
+        <span>${game.featured ? "Featured" : "Classic"}</span>
       </div>
       <h3>${game.title}</h3>
       <p>${game.description}</p>
@@ -117,7 +112,7 @@ function renderGames() {
     return game.featured && matchesSearch && matchesCategory;
   });
 
-  const trendingGames = games.filter((game) => {
+  const allGames = games.filter((game) => {
     const matchesSearch = game.title.toLowerCase().includes(search) || game.description.toLowerCase().includes(search);
     const matchesCategory = activeCategory === "All" || game.category === activeCategory;
     return matchesSearch && matchesCategory;
@@ -127,9 +122,9 @@ function renderGames() {
     ? featuredGames.map(createCardMarkup).join("")
     : '<div class="empty-state">No featured games match that search yet.</div>';
 
-  trendingRoot.innerHTML = trendingGames.length
-    ? trendingGames.map(createCardMarkup).join("")
-    : '<div class="empty-state">No trending games match that search yet.</div>';
+  allGamesRoot.innerHTML = allGames.length
+    ? allGames.map(createCardMarkup).join("")
+    : '<div class="empty-state">No games match that search yet.</div>';
 }
 
 searchInput.addEventListener("input", renderGames);

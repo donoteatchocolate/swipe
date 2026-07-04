@@ -53,12 +53,14 @@
     <!-- Sidebar / Dashboard -->
     <div class="w-full md:w-96 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col h-2/5 md:h-full z-10 shadow-2xl shrink-0">
         <!-- Title Header -->
-        <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between gap-2">
             <div>
                 <h1 class="header-font text-xl md:text-2xl font-black text-amber-500 tracking-wider">CAMPFIRE</h1>
                 <p class="text-xs text-amber-600/80 font-bold tracking-widest uppercase">& Crown — Builder</p>
             </div>
-            <button id="btn-sound" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Toggle Sound">
+            <div class="flex items-center gap-2">
+                <a href="../../index.html" class="px-3 py-2 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 text-sm font-semibold border border-slate-700 transition-colors">← Menu</a>
+                <button id="btn-sound" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Toggle Sound">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 18.75V5.25L7.75 9.5H4.5v5h3.25L12 18.75z" />
                 </svg>
