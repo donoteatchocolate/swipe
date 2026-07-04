@@ -7,6 +7,7 @@ const games = [
     featured: true,
     trending: true,
     thumbnail: "💼",
+    icon: "icons/business-clicker.svg",
     accent: "linear-gradient(135deg, #2dd4bf, #2563eb)",
     path: "./games/businessclicker/index.html"
   },
@@ -18,19 +19,45 @@ const games = [
     featured: true,
     trending: true,
     thumbnail: "⚔️",
+    icon: "icons/tiny-royale.svg",
     accent: "linear-gradient(135deg, #fb923c, #ef4444)",
     path: "./games/tinyroyale/index.html"
   },
   {
-    id: "neon-drift",
-    title: "Neon Drift",
+    id: "racer",
+    title: "Racer",
     description: "Race through glowing city grids and master tight turns in a slick arcade sprint.",
     category: "Arcade",
     featured: false,
     trending: true,
     thumbnail: "🏎️",
+    icon: "icons/racer.svg",
     accent: "linear-gradient(135deg, #818cf8, #ec4899)",
     path: "./games/racer/index.html"
+  },
+  {
+    id: "campfire-and-crown",
+    title: "Campfire and Crown",
+    description: "A cozy yet competitive adventure — gather, craft, and claim your crown.",
+    category: "Arcade",
+    featured: false,
+    trending: false,
+    thumbnail: "🔥👑",
+    icon: "icons/campfire-and-crown.svg",
+    accent: "linear-gradient(135deg, #f97316, #f43f5e)",
+    path: "./games/campfire-and-crown/index.html"
+  },
+  {
+    id: "pizza-monster",
+    title: "Pizza Monster",
+    description: "Chomp pizzas, dodge oven hazards, and grow into the ultimate pizza monster.",
+    category: "Arcade",
+    featured: false,
+    trending: false,
+    thumbnail: "🍕",
+    icon: "icons/pizza-monster.svg",
+    accent: "linear-gradient(135deg, #f97316, #f59e0b)",
+    path: "./games/pizza-monster/index.html"
   }
 ];
 
@@ -62,10 +89,14 @@ function renderCategoryFilters() {
 }
 
 function createCardMarkup(game) {
+  const thumb = game.icon
+    ? `<img src="${game.icon}" alt="${game.title} icon" style="width:48px;height:48px;object-fit:contain;border-radius:8px;">`
+    : game.thumbnail;
+
   return `
     <article class="game-card">
       <span class="status-pill">${game.featured ? "Featured" : "New"}</span>
-      <div class="thumb" style="background: ${game.accent}">${game.thumbnail}</div>
+      <div class="thumb" style="background: ${game.accent}">${thumb}</div>
       <div class="card-meta">
         <span>${game.category}</span>
         <span>${game.trending ? "Trending" : "Classic"}</span>

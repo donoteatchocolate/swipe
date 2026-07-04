@@ -1,0 +1,2668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Untitled</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Campfire & Crown - Cozy Village Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&family=Cinzel:wght=600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .header-font {
+            font-family: 'Cinzel', serif;
+        }
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        @keyframes fire-glow {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        .glow-fire {
+            animation: fire-glow 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="overflow-hidden h-screen w-screen flex flex-col md:flex-row text-slate-100">
+
+    <!-- Sidebar / Dashboard -->
+    <div class="w-full md:w-96 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col h-2/5 md:h-full z-10 shadow-2xl shrink-0">
+        <!-- Title Header -->
+        <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+            <div>
+                <h1 class="header-font text-xl md:text-2xl font-black text-amber-500 tracking-wider">CAMPFIRE</h1>
+                <p class="text-xs text-amber-600/80 font-bold tracking-widest uppercase">& Crown — Builder</p>
+            </div>
+            <button id="btn-sound" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Toggle Sound">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 18.75V5.25L7.75 9.5H4.5v5h3.25L12 18.75z" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Resource Bar / Overview -->
+        <div class="grid grid-cols-4 gap-2 p-4 bg-slate-900/60 border-b border-slate-800 text-center">
+            <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                <div class="text-xs font-semibold text-slate-400">Wood</div>
+                <div id="res-wood" class="text-lg font-bold text-amber-400">50</div>
+            </div>
+            <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                <div class="text-xs font-semibold text-slate-400">Food</div>
+                <div id="res-food" class="text-lg font-bold text-emerald-400">30</div>
+            </div>
+            <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                <div class="text-xs font-semibold text-slate-400">People</div>
+                <div id="res-pop" class="text-lg font-bold text-sky-400">4 / 5</div>
+            </div>
+            <div class="bg-slate-950/80 p-2 rounded-lg border border-slate-800">
+                <div class="text-xs font-semibold text-slate-400">Day</div>
+                <div id="res-day" class="text-lg font-bold text-indigo-400">1</div>
+            </div>
+        </div>
+
+        <!-- Scrollable Action Center -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- Game Phase / Alerts -->
+            <div id="time-banner" class="bg-indigo-950/40 border border-indigo-800/60 p-3 rounded-xl flex items-center justify-between">
+                <div>
+                    <span id="time-label" class="text-sm font-semibold text-indigo-300">Morning Settles In</span>
+                    <div id="time-clock" class="text-xs text-indigo-400/80">08:00 AM</div>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center glow-fire">
+                    <span id="time-icon" class="text-lg">☀️</span>
+                </div>
+            </div>
+
+            <!-- Active Tool / Deselect Section -->
+            <div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-interact-mode" class="py-3 px-4 bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 border-2 border-amber-300" title="Chop & Interact with Trees / Crops">
+                        <span class="text-lg">🪓</span>
+                        <span>Chop Mode</span>
+                    </button>
+                    <button id="btn-demolish-mode" class="py-3 px-4 bg-slate-800 text-slate-400 hover:bg-slate-700 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 border-2 border-transparent" title="Deconstruct Structures & Blueprints">
+                        <span class="text-lg">🗑️</span>
+                        <span>Demolish</span>
+                    </button>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-2.5 text-center">Press <kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300">Esc</kbd> or Right-Click to switch back to Chop Mode.</p>
+            </div>
+
+            <!-- Build Menu -->
+            <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Build Structure</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="build-wall" class="build-btn p-3 bg-slate-950 hover:bg-slate-800 border-2 border-slate-800 hover:border-amber-500/50 rounded-xl transition-all text-left flex flex-col justify-between" data-type="wall">
+                        <div class="flex justify-between items-start w-full">
+                            <span class="text-xl">🪵</span>
+                            <span class="text-xs px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded font-bold">10 W</span>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-sm font-semibold block">Wooden Wall</span>
+                            <span class="text-[10px] text-slate-400">Solid log blockade</span>
+                        </div>
+                    </button>
+
+                    <button id="build-farm" class="build-btn p-3 bg-slate-950 hover:bg-slate-800 border-2 border-slate-800 hover:border-emerald-500/50 rounded-xl transition-all text-left flex flex-col justify-between" data-type="farm">
+                        <div class="flex justify-between items-start w-full">
+                            <span class="text-xl">🌾</span>
+                            <span class="text-xs px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded font-bold">15 W</span>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-sm font-semibold block">Crop Patch</span>
+                            <span class="text-[10px] text-slate-400">Grows 3 detailed crops</span>
+                        </div>
+                    </button>
+
+                    <button id="build-house" class="build-btn p-3 bg-slate-950 hover:bg-slate-800 border-2 border-slate-800 hover:border-sky-500/50 rounded-xl transition-all text-left flex flex-col justify-between" data-type="house">
+                        <div class="flex justify-between items-start w-full">
+                            <span class="text-xl">🏠</span>
+                            <span class="text-xs px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded font-bold">35 W</span>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-sm font-semibold block">Cottage</span>
+                            <span class="text-[10px] text-slate-400">Stone chimney & doors</span>
+                        </div>
+                    </button>
+
+                    <button id="build-tower" class="build-btn p-3 bg-slate-950 hover:bg-slate-800 border-2 border-slate-800 hover:border-rose-500/50 rounded-xl transition-all text-left flex flex-col justify-between" data-type="tower">
+                        <div class="flex justify-between items-start w-full">
+                            <span class="text-xl">🏹</span>
+                            <span class="text-xs px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded font-bold">40 W, 10 F</span>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-sm font-semibold block">Archer Tower</span>
+                            <span class="text-[10px] text-slate-400">Shoots helper arrows</span>
+                        </div>
+                    </button>
+
+                    <button id="build-barracks" class="build-btn p-3 bg-slate-950 hover:bg-slate-800 border-2 border-slate-800 hover:border-blue-500/50 rounded-xl transition-all text-left flex flex-col justify-between" data-type="barracks">
+                        <div class="flex justify-between items-start w-full">
+                            <span class="text-xl">⚔️</span>
+                            <span class="text-xs px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded font-bold">50 W, 15 F</span>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-sm font-semibold block">Barracks</span>
+                            <span class="text-[10px] text-slate-400">Train guards with Food</span>
+                        </div>
+                    </button>
+
+                    <button id="build-lumber_generator" class="build-btn p-3 bg-slate-950 hover:bg-slate-800 border-2 border-slate-800 hover:border-amber-500/50 rounded-xl transition-all text-left flex flex-col justify-between" data-type="lumber_generator">
+                        <div class="flex justify-between items-start w-full">
+                            <span class="text-xl">⚙️🪵</span>
+                            <span class="text-xs px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded font-bold">40 W, 5 F</span>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-sm font-semibold block">Lumber Gen</span>
+                            <span class="text-[10px] text-slate-400">+1 Wood/sec automatically</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Villager Management -->
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Manage Villagers</h3>
+                    <span id="unassigned-count" class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">Idle: 1</span>
+                </div>
+                <div class="space-y-2">
+                    <div class="bg-slate-950 p-3 rounded-xl flex items-center justify-between border border-slate-800/60">
+                        <div class="flex items-center gap-3">
+                            <span class="text-lg">🪓</span>
+                            <div>
+                                <span class="text-xs font-bold block">Woodcutters</span>
+                                <span class="text-[10px] text-slate-400">Red lumberjack hats</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="job-btn w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-lg flex items-center justify-center font-bold" data-job="woodcutter" data-action="remove">-</button>
+                            <span id="job-woodcutter" class="text-sm font-bold w-4 text-center">1</span>
+                            <button class="job-btn w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-lg flex items-center justify-center font-bold" data-job="woodcutter" data-action="add">+</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-xl flex items-center justify-between border border-slate-800/60">
+                        <div class="flex items-center gap-3">
+                            <span class="text-lg">🧑‍🌾</span>
+                            <div>
+                                <span class="text-xs font-bold block">Farmers</span>
+                                <span class="text-[10px] text-slate-400">Woven straw hats</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="job-btn w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-lg flex items-center justify-center font-bold" data-job="farmer" data-action="remove">-</button>
+                            <span id="job-farmer" class="text-sm font-bold w-4 text-center">1</span>
+                            <button class="job-btn w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-lg flex items-center justify-center font-bold" data-job="farmer" data-action="add">+</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-xl flex items-center justify-between border border-slate-800/60">
+                        <div class="flex items-center gap-3">
+                            <span class="text-lg">🔨</span>
+                            <div>
+                                <span class="text-xs font-bold block">Builders</span>
+                                <span class="text-[10px] text-slate-400">Purple builder caps</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="job-btn w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-lg flex items-center justify-center font-bold" data-job="builder" data-action="remove">-</button>
+                            <span id="job-builder" class="text-sm font-bold w-4 text-center">1</span>
+                            <button class="job-btn w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-lg flex items-center justify-center font-bold" data-job="builder" data-action="add">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="log-panel" class="p-3 bg-slate-950 border-t border-slate-800 text-xs text-slate-400 h-24 overflow-y-auto space-y-1">
+            <div class="text-emerald-500 font-semibold">Active Mode: Protect and grow the crown!</div>
+            <div>- Walk near trees to chop them down.</div>
+            <div>- Build a Barracks & click it with 25 Food to train local patrol Soldiers!</div>
+        </div>
+    </div>
+
+    <!-- Main Game Viewport -->
+    <div class="flex-grow flex-1 relative h-3/5 md:h-full flex flex-col overflow-hidden">
+        
+        <canvas id="game-canvas" class="w-full h-full cursor-crosshair block bg-slate-950"></canvas>
+
+        <!-- Custom Touch Controls for Mobile (z-40 so it stays above the canvas) -->
+        <div id="touch-controls" class="absolute bottom-4 right-4 z-40 flex flex-col gap-1 items-center md:hidden bg-slate-900/50 p-2 rounded-2xl backdrop-blur-sm">
+            <div class="flex justify-center">
+                <button id="key-up" class="w-12 h-12 bg-slate-800/90 text-white rounded-xl active:bg-amber-600 font-bold shadow-lg flex items-center justify-center">▲</button>
+            </div>
+            <div class="flex gap-1 justify-center">
+                <button id="key-left" class="w-12 h-12 bg-slate-800/90 text-white rounded-xl active:bg-amber-600 font-bold shadow-lg flex items-center justify-center">◀</button>
+                <button id="key-chop" class="w-12 h-12 bg-amber-600 text-white rounded-xl active:bg-amber-700 font-bold shadow-lg flex flex-col items-center justify-center text-[10px]">🪓<span class="text-[8px]">CHOP</span></button>
+                <button id="key-right" class="w-12 h-12 bg-slate-800/90 text-white rounded-xl active:bg-amber-600 font-bold shadow-lg flex items-center justify-center">▶</button>
+            </div>
+            <div class="flex justify-center">
+                <button id="key-down" class="w-12 h-12 bg-slate-800/90 text-white rounded-xl active:bg-amber-600 font-bold shadow-lg flex items-center justify-center">▼</button>
+            </div>
+        </div>
+
+        <!-- Warning Toast Element (z-45 so it stays above touch controls) -->
+        <div id="game-toast" class="absolute top-4 right-4 z-45 bg-rose-950 border border-rose-800 px-4 py-2.5 rounded-xl shadow-2xl backdrop-blur-md text-xs text-rose-200 font-semibold transform translate-y-[-100px] opacity-0 transition-all duration-300">
+            Cannot build over obstacles! Clear them first.
+        </div>
+    </div>
+
+    <!-- Game Over / Defeat Overlay Screen (fixed inset-0 with z-[9999] so it completely covers the sidebar, viewport, and canvas) -->
+    <div id="game-over-screen" class="hidden fixed inset-0 bg-slate-950/90 z-[9999] flex flex-col items-center justify-center p-6 text-center">
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl max-w-md shadow-2xl">
+            <span class="text-6xl mb-4 block">✨💤</span>
+            <h2 class="header-font text-3xl font-bold text-rose-500 mb-2">REST NEEDED</h2>
+            <p class="text-slate-400 mb-6 text-sm">You were tuckered out by the shadow beasts! Rest up by the campfire next time to keep your energy high.</p>
+            <button onclick="resetGame()" class="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-sm rounded-xl transition-all shadow-lg hover:shadow-amber-600/30">
+                Try Again
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Web Audio Synthesizer ---
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playChop() {
+                if (!this.enabled) return;
+                this.init();
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(120, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+            playBuild() {
+                if (!this.enabled) return;
+                this.init();
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.setValueAtTime(110, this.ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.2);
+            }
+            playTing() {
+                if (!this.enabled) return;
+                this.init();
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(440, this.ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+            playArrow() {
+                if (!this.enabled) return;
+                this.init();
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+            playSlash() {
+                if (!this.enabled) return;
+                this.init();
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(350, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.1);
+            }
+            playHit() {
+                if (!this.enabled) return;
+                this.init();
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(80, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+            playDayNight(isNight) {
+                if (!this.enabled) return;
+                this.init();
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(isNight ? 220 : 440, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(isNight ? 110 : 660, this.ctx.currentTime + 0.5);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.5);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.5);
+            }
+        }
+        const sfx = new SoundEngine();
+
+        document.getElementById('btn-sound').addEventListener('click', function() {
+            sfx.enabled = !sfx.enabled;
+            this.classList.toggle('text-slate-300', sfx.enabled);
+            this.classList.toggle('text-slate-600', !sfx.enabled);
+        });
+
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const lightCanvas = document.createElement('canvas');
+        const lightCtx = lightCanvas.getContext('2d');
+
+        const GRID_SIZE = 48;
+        const MAP_TILES = 40;
+        const MAP_SIZE = MAP_TILES * GRID_SIZE;
+
+        let resources = { wood: 100, food: 50 };
+        let popLimit = 5;
+        let dayCount = 1;
+        let dayTime = 400;
+        let isNight = false;
+        let gameOverActive = false;
+        let lastLumberTick = Date.now();
+
+        let player = {
+            x: MAP_SIZE / 2,
+            y: MAP_SIZE / 2 + 50,
+            targetX: MAP_SIZE / 2,
+            targetY: MAP_SIZE / 2,
+            speed: 4,
+            size: 14,
+            facingLeft: false,
+            swinging: false,
+            swingAngle: 0,
+            gold: 0,
+            health: 100,
+            maxHealth: 100
+        };
+
+        let grid = [];
+        let particles = [];
+        let villagers = [];
+        let enemies = [];
+        let projectiles = [];
+
+        let selectedBuildOption = null;
+        let mouseTileX = 0;
+        let mouseTileY = 0;
+
+        const logPanel = document.getElementById('log-panel');
+        const toast = document.getElementById('game-toast');
+
+        function addLog(msg, color = 'text-slate-400') {
+            const entry = document.createElement('div');
+            entry.className = color;
+            entry.innerText = `- ${msg}`;
+            logPanel.prepend(entry);
+        }
+
+        function triggerToast(text) {
+            toast.innerText = text;
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.transform = 'translateY(-100px)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        function initGrid() {
+            grid = [];
+            const centerTile = Math.floor(MAP_TILES / 2);
+
+            for (let x = 0; x < MAP_TILES; x++) {
+                grid[x] = [];
+                for (let y = 0; y < MAP_TILES; y++) {
+                    let type = 'grass';
+                    let health = 100;
+                    let growth = 0;
+
+                    const distToCenter = Math.hypot(x - centerTile, y - centerTile);
+
+                    if (x === centerTile && y === centerTile) {
+                        type = 'campfire';
+                        health = 1000;
+                    } else if (distToCenter < 4) {
+                        type = 'grass';
+                    } else {
+                        const isTree = Math.sin(x * 0.4) * Math.cos(y * 0.4) > -0.15 && Math.random() < 0.65;
+                        if (isTree) {
+                            type = 'tree';
+                            health = 4;
+                        }
+                    }
+
+                    let decoration = 0;
+                    if (type === 'grass' && Math.random() < 0.15) {
+                        decoration = Math.floor(Math.random() * 3) + 1;
+                    }
+
+                    let treeVariant = Math.floor(Math.random() * 3);
+
+                    grid[x][y] = { 
+                        x, 
+                        y, 
+                        type, 
+                        health, 
+                        growth,
+                        decoration,
+                        treeVariant,
+                        cropType: null,
+                        houseVariant: 0,
+                        wallVariant: Math.floor(Math.random() * 3),
+                        demolishTarget: null
+                    };
+                }
+            }
+
+            grid[centerTile - 2][centerTile] = {
+                x: centerTile - 2, y: centerTile,
+                type: 'house', health: 100, growth: 0, decoration: 0, treeVariant: 0,
+                cropType: null, houseVariant: 0, wallVariant: 1, demolishTarget: null
+            };
+            grid[centerTile + 2][centerTile] = {
+                x: centerTile + 2, y: centerTile,
+                type: 'farm', health: 100, growth: 100, decoration: 0, treeVariant: 0,
+                cropType: 'pumpkin', houseVariant: 1, wallVariant: 1, demolishTarget: null
+            };
+            grid[centerTile][centerTile - 2] = {
+                x: centerTile, y: centerTile - 2,
+                type: 'tower', health: 100, growth: 0, decoration: 0, treeVariant: 0,
+                cropType: null, houseVariant: 0, wallVariant: 2, demolishTarget: null
+            };
+
+            recalculateLimits();
+        }
+
+        function isEntityOverlappingTile(tx, ty) {
+            const tileLeft = tx * GRID_SIZE;
+            const tileRight = (tx + 1) * GRID_SIZE;
+            const tileTop = ty * GRID_SIZE;
+            const tileBottom = (ty + 1) * GRID_SIZE;
+
+            if (player.x + player.size > tileLeft && player.x - player.size < tileRight &&
+                player.y + player.size > tileTop && player.y - player.size < tileBottom) {
+                return true;
+            }
+
+            for (let v of villagers) {
+                if (v.x + v.size > tileLeft && v.x - v.size < tileRight &&
+                    v.y + v.size > tileTop && v.y - v.size < tileBottom) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Returns true if a tile is structurally solid and impassable
+        function isTileSolid(tx, ty) {
+            if (tx < 0 || tx >= MAP_TILES || ty < 0 || ty >= MAP_TILES) return true;
+            const type = grid[tx][ty].type;
+            
+            // Explicitly allowed/passable - Barracks have no collision!
+            if (type === 'grass' || type === 'campfire' || type === 'barracks' || type === 'blueprint_barracks') return false;
+            
+            // If it's a blueprint demolish of a barracks, it's also passable
+            if (type === 'blueprint_demolish' && grid[tx][ty].demolishTarget === 'barracks') return false;
+            
+            // Solid structures
+            if (type === 'wall' || type === 'house' || type === 'tower' || type === 'lumber_generator' || type === 'tree') return true;
+            if (type.startsWith('blueprint_')) return true;
+            
+            return false;
+        }
+
+        function canPassTile(tx, ty) {
+            return !isTileSolid(tx, ty);
+        }
+
+        function canPassThrough(px, py) {
+            if (px < 0 || px >= MAP_SIZE || py < 0 || py >= MAP_SIZE) return false;
+            let tx = Math.floor(px / GRID_SIZE);
+            let ty = Math.floor(py / GRID_SIZE);
+            return canPassTile(tx, ty);
+        }
+
+        // --- A* LIGHTWEIGHT PATHFINDER SYSTEM ---
+        function findPath(sx, sy, tx, ty) {
+            sx = Math.max(0, Math.min(MAP_TILES - 1, sx));
+            sy = Math.max(0, Math.min(MAP_TILES - 1, sy));
+            tx = Math.max(0, Math.min(MAP_TILES - 1, tx));
+            ty = Math.max(0, Math.min(MAP_TILES - 1, ty));
+
+            if (sx === tx && sy === ty) return [];
+
+            if (!canPassTile(tx, ty)) {
+                let neighbors = [
+                    {x: tx - 1, y: ty}, {x: tx + 1, y: ty},
+                    {x: tx, y: ty - 1}, {x: tx, y: ty + 1},
+                    {x: tx - 1, y: ty - 1}, {x: tx + 1, y: ty - 1},
+                    {x: tx - 1, y: ty + 1}, {x: tx + 1, y: ty + 1}
+                ];
+                let best = null;
+                let bestDist = Infinity;
+                for (let n of neighbors) {
+                    if (canPassTile(n.x, n.y)) {
+                        let d = Math.hypot(n.x - sx, n.y - sy);
+                        if (d < bestDist) {
+                            bestDist = d;
+                            best = n;
+                        }
+                    }
+                }
+                if (best) {
+                    tx = best.x;
+                    ty = best.y;
+                } else {
+                    return null;
+                }
+            }
+
+            let openSet = [];
+            let closedSet = new Set();
+
+            let startNode = {
+                x: sx,
+                y: sy,
+                g: 0,
+                h: Math.abs(sx - tx) + Math.abs(sy - ty),
+                f: 0,
+                parent: null
+            };
+            startNode.f = startNode.g + startNode.h;
+            openSet.push(startNode);
+
+            let iterations = 0;
+            const maxIterations = 300;
+
+            while (openSet.length > 0 && iterations < maxIterations) {
+                iterations++;
+                let currentIndex = 0;
+                for (let i = 1; i < openSet.length; i++) {
+                    if (openSet[i].f < openSet[currentIndex].f) {
+                        currentIndex = i;
+                    }
+                }
+
+                let current = openSet[currentIndex];
+
+                if (current.x === tx && current.y === ty) {
+                    let path = [];
+                    let curr = current;
+                    while (curr !== null) {
+                        path.push({x: curr.x * GRID_SIZE + GRID_SIZE/2, y: curr.y * GRID_SIZE + GRID_SIZE/2});
+                        curr = curr.parent;
+                    }
+                    return path.reverse();
+                }
+
+                openSet.splice(currentIndex, 1);
+                closedSet.add(`${current.x},${current.y}`);
+
+                // Generate primary cardinal neighbors
+                let neighbors = [
+                    {x: current.x - 1, y: current.y, cost: 1},
+                    {x: current.x + 1, y: current.y, cost: 1},
+                    {x: current.x, y: current.y - 1, cost: 1},
+                    {x: current.x, y: current.y + 1, cost: 1}
+                ];
+
+                // Dynamic corner-squeezing block protection: Only allow diagonal movements
+                // if both adjacent cardinally adjacent blocks are also fully passable.
+                if (canPassTile(current.x - 1, current.y) && canPassTile(current.x, current.y - 1)) {
+                    neighbors.push({x: current.x - 1, y: current.y - 1, cost: 1.414});
+                }
+                if (canPassTile(current.x + 1, current.y) && canPassTile(current.x, current.y - 1)) {
+                    neighbors.push({x: current.x + 1, y: current.y - 1, cost: 1.414});
+                }
+                if (canPassTile(current.x - 1, current.y) && canPassTile(current.x, current.y + 1)) {
+                    neighbors.push({x: current.x - 1, y: current.y + 1, cost: 1.414});
+                }
+                if (canPassTile(current.x + 1, current.y) && canPassTile(current.x, current.y + 1)) {
+                    neighbors.push({x: current.x + 1, y: current.y + 1, cost: 1.414});
+                }
+
+                for (let n of neighbors) {
+                    if (!canPassTile(n.x, n.y)) continue;
+                    if (closedSet.has(`${n.x},${n.y}`)) continue;
+
+                    let gScore = current.g + n.cost;
+                    let existingNode = openSet.find(o => o.x === n.x && o.y === n.y);
+
+                    if (!existingNode) {
+                        let hScore = Math.abs(n.x - tx) + Math.abs(n.y - ty);
+                        let neighborNode = {
+                            x: n.x,
+                            y: n.y,
+                            g: gScore,
+                            h: hScore,
+                            f: gScore + hScore,
+                            parent: current
+                        };
+                        openSet.push(neighborNode);
+                    } else if (gScore < existingNode.g) {
+                        existingNode.g = gScore;
+                        existingNode.f = gScore + existingNode.h;
+                        existingNode.parent = current;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        class Beast {
+            constructor() {
+                const side = Math.floor(Math.random() * 4);
+                if (side === 0) {
+                    this.x = Math.random() * MAP_SIZE;
+                    this.y = 10;
+                } else if (side === 1) {
+                    this.x = MAP_SIZE - 10;
+                    this.y = Math.random() * MAP_SIZE;
+                } else if (side === 2) {
+                    this.x = Math.random() * MAP_SIZE;
+                    this.y = MAP_SIZE - 10;
+                } else {
+                    this.x = 10;
+                    this.y = Math.random() * MAP_SIZE;
+                }
+
+                this.speed = Math.min(3.2, 1.1 + (dayCount * 0.15));
+                this.health = 15 + (dayCount * 8);
+                this.maxHealth = this.health;
+                this.size = 11;
+                this.cooldown = 0;
+            }
+
+            update() {
+                if (this.cooldown > 0) this.cooldown--;
+
+                let targetX = player.x;
+                let targetY = player.y;
+                let targetEntity = player;
+                let minDist = Math.hypot(player.x - this.x, player.y - this.y);
+
+                for (let v of villagers) {
+                    let d = Math.hypot(v.x - this.x, v.y - this.y);
+                    if (d < minDist) {
+                        minDist = d;
+                        targetX = v.x;
+                        targetY = v.y;
+                        targetEntity = v;
+                    }
+                }
+
+                const dx = targetX - this.x;
+                const dy = targetY - this.y;
+                const dist = Math.hypot(dx, dy);
+
+                // Handle Attack range: attack immediately when close, no clipping inside
+                if (dist < 24) {
+                    if (this.cooldown === 0) {
+                        this.cooldown = 50;
+                        sfx.playHit();
+                        createImpactParticles(targetX, targetY, '#ef4444', 8);
+                        if (targetEntity === player) {
+                            player.health = Math.max(0, player.health - 12);
+                            addLog("A shadow beast tickled you! Energy draining...", "text-rose-300 font-bold");
+                            
+                            if (player.health <= 0) {
+                                endGame();
+                            }
+                        } else if (targetEntity) {
+                            targetEntity.health = Math.max(0, targetEntity.health - 12);
+                            if (targetEntity.health <= 0) {
+                                if (targetEntity.job === 'soldier') {
+                                    addLog("A valiant soldier fainted and returned to the barracks to rest!", "text-amber-400");
+                                    targetEntity.x = targetEntity.homeX;
+                                    targetEntity.y = targetEntity.homeY;
+                                } else {
+                                    addLog("A citizen fainted and ran back to the campfire to rest!", "text-amber-400");
+                                    targetEntity.x = MAP_SIZE / 2;
+                                    targetEntity.y = MAP_SIZE / 2;
+                                    targetEntity.job = 'idle';
+                                }
+                                targetEntity.health = targetEntity.maxHealth;
+                                updateUI();
+                            }
+                        }
+                    }
+                    return; // Hold position during melee range
+                }
+
+                // If not in attack range, move towards target
+                if (dist > 5) {
+                    const stepX = (dx / dist) * this.speed;
+                    const nextX = this.x + stepX;
+                    const stepY = (dy / dist) * this.speed;
+                    const nextY = this.y + stepY;
+
+                    const tileX = Math.floor(nextX / GRID_SIZE);
+                    const tileY = Math.floor(nextY / GRID_SIZE);
+
+                    if (tileX >= 0 && tileX < MAP_TILES && tileY >= 0 && tileY < MAP_TILES) {
+                        const cell = grid[tileX][tileY];
+                        if (cell.type === 'wall' || cell.type === 'house' || cell.type === 'tower' || cell.type === 'barracks' || cell.type === 'lumber_generator') {
+                            if (this.cooldown === 0) {
+                                cell.health -= 12;
+                                this.cooldown = 60;
+                                sfx.playHit();
+                                createImpactParticles(tileX * GRID_SIZE + 24, tileY * GRID_SIZE + 24, '#b91c1c', 6);
+                                addLog(`Shadow Beast ticks your ${cell.type}!`, 'text-rose-400');
+                                if (cell.health <= 0) {
+                                    cell.type = 'grass';
+                                    recalculateLimits();
+                                }
+                            }
+                        } else {
+                            this.x = nextX;
+                            this.y = nextY;
+                        }
+                    }
+                }
+            }
+        }
+
+        class Villager {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.speed = 1.8;
+                this.size = 10;
+                this.job = 'idle';
+                this.target = null;
+                this.stateTimer = 0;
+                this.actionCooldown = 0;
+                this.assignedBuilding = null;
+                this.color = '#38bdf8';
+                this.health = 100;
+                this.maxHealth = 100;
+                this.path = [];
+                this.homeX = MAP_SIZE / 2;
+                this.homeY = MAP_SIZE / 2;
+            }
+
+            setTarget(targetCoords) {
+                this.target = targetCoords;
+                this.path = [];
+            }
+
+            update() {
+                this.color = this.job === 'woodcutter' ? '#f59e0b' : 
+                             this.job === 'farmer' ? '#10b981' : 
+                             this.job === 'builder' ? '#8b5cf6' : 
+                             this.job === 'soldier' ? '#e2e8f0' : '#38bdf8';
+
+                if (this.actionCooldown > 0) {
+                    this.actionCooldown--;
+                    return;
+                }
+
+                if (this.job === 'woodcutter') {
+                    this.handleWoodcutting();
+                } else if (this.job === 'farmer') {
+                    this.handleFarming();
+                } else if (this.job === 'builder') {
+                    this.handleBuilding();
+                } else if (this.job === 'soldier') {
+                    this.handleSoldierCombat();
+                } else {
+                    this.wanderAroundCamp();
+                }
+            }
+
+            wanderAroundCamp() {
+                if (!this.target) {
+                    const centerTile = Math.floor(MAP_TILES / 2) * GRID_SIZE + GRID_SIZE/2;
+                    const rx = centerTile + (Math.random() - 0.5) * 150;
+                    const ry = centerTile + (Math.random() - 0.5) * 150;
+                    this.setTarget({ x: rx, y: ry });
+                }
+
+                this.moveToTarget(() => {
+                    this.setTarget(null);
+                    this.actionCooldown = 30 + Math.random() * 60;
+                });
+            }
+
+            handleWoodcutting() {
+                if (!this.target || this.target.type !== 'tree') {
+                    let nearestTree = null;
+                    let minDist = Infinity;
+                    const myTx = Math.floor(this.x / GRID_SIZE);
+                    const myTy = Math.floor(this.y / GRID_SIZE);
+
+                    for (let x = 0; x < MAP_TILES; x++) {
+                        for (let y = 0; y < MAP_TILES; y++) {
+                            if (grid[x][y].type === 'tree') {
+                                const d = Math.hypot(x - myTx, y - myTy);
+                                if (d < minDist) {
+                                    minDist = d;
+                                    nearestTree = grid[x][y];
+                                }
+                            }
+                        }
+                    }
+
+                    if (nearestTree) {
+                        this.setTarget({
+                            x: nearestTree.x * GRID_SIZE + GRID_SIZE / 2,
+                            y: nearestTree.y * GRID_SIZE + GRID_SIZE / 2,
+                            type: 'tree',
+                            cell: nearestTree
+                        });
+                    } else {
+                        this.wanderAroundCamp();
+                    }
+                } else {
+                    this.moveToTarget(() => {
+                        const cell = this.target.cell;
+                        if (cell.type === 'tree') {
+                            cell.health -= 1;
+                            sfx.playChop();
+                            createImpactParticles(cell.x * GRID_SIZE + 24, cell.y * GRID_SIZE + 24, '#15803d');
+                            if (cell.health <= 0) {
+                                cell.type = 'grass';
+                                resources.wood += 5;
+                                addLog("Woodcutter chopped a tree! (+5 Wood)", 'text-amber-400');
+                                updateUI();
+                                this.setTarget(null);
+                            } else {
+                                this.actionCooldown = 40;
+                            }
+                        } else {
+                            this.setTarget(null);
+                        }
+                    });
+                }
+            }
+
+            handleFarming() {
+                if (!this.target || (this.target.type !== 'farm' && this.target.type !== 'farm-grow')) {
+                    let targetFarm = null;
+                    let minDist = Infinity;
+                    const myTx = Math.floor(this.x / GRID_SIZE);
+                    const myTy = Math.floor(this.y / GRID_SIZE);
+
+                    let ripeFarms = [];
+                    for (let x = 0; x < MAP_TILES; x++) {
+                        for (let y = 0; y < MAP_TILES; y++) {
+                            if (grid[x][y].type === 'farm' && grid[x][y].growth >= 100) {
+                                ripeFarms.push(grid[x][y]);
+                            }
+                        }
+                    }
+
+                    if (ripeFarms.length > 0) {
+                        for (let farm of ripeFarms) {
+                            let d = Math.hypot(farm.x - myTx, farm.y - myTy);
+                            if (d < minDist) {
+                                minDist = d;
+                                targetFarm = farm;
+                            }
+                        }
+                    } else {
+                        for (let x = 0; x < MAP_TILES; x++) {
+                            for (let y = 0; y < MAP_TILES; y++) {
+                                if (grid[x][y].type === 'farm' && grid[x][y].growth < 100) {
+                                    let d = Math.hypot(x - myTx, y - myTy);
+                                    if (d < minDist) {
+                                        minDist = d;
+                                        targetFarm = grid[x][y];
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (targetFarm) {
+                        this.setTarget({
+                            x: targetFarm.x * GRID_SIZE + GRID_SIZE/2,
+                            y: targetFarm.y * GRID_SIZE + GRID_SIZE/2,
+                            type: 'farm',
+                            cell: targetFarm
+                        });
+                    } else {
+                        this.wanderAroundCamp();
+                    }
+                } else {
+                    this.moveToTarget(() => {
+                        const cell = this.target.cell;
+                        if (cell.type === 'farm') {
+                            if (cell.growth >= 100) {
+                                cell.growth = 0;
+                                resources.food += 6;
+                                addLog(`Farmer harvested some ${cell.cropType.toUpperCase()} (+6 Food)`, "text-emerald-400");
+                                sfx.playTing();
+                                updateUI();
+                                createImpactParticles(cell.x * GRID_SIZE + 24, cell.y * GRID_SIZE + 24, '#34d399', 8);
+                            } else {
+                                cell.growth = Math.min(100, cell.growth + 20);
+                                this.actionCooldown = 30;
+                            }
+                        }
+                        this.setTarget(null);
+                    });
+                }
+            }
+
+            handleBuilding() {
+                if (!this.target || this.target.type !== 'build') {
+                    let buildTile = null;
+                    for (let x = 0; x < MAP_TILES; x++) {
+                        for (let y = 0; y < MAP_TILES; y++) {
+                            const c = grid[x][y];
+                            if (c.type === 'blueprint_wall' || c.type === 'blueprint_tower' || 
+                                c.type === 'blueprint_house' || c.type === 'blueprint_farm' || 
+                                c.type === 'blueprint_barracks' || c.type === 'blueprint_lumber_generator' || c.type === 'blueprint_demolish') {
+                                buildTile = c;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (buildTile) {
+                        this.setTarget({
+                            x: buildTile.x * GRID_SIZE + GRID_SIZE/2,
+                            y: buildTile.y * GRID_SIZE + GRID_SIZE/2,
+                            type: 'build',
+                            cell: buildTile
+                        });
+                    } else {
+                        this.wanderAroundCamp();
+                    }
+                } else {
+                    this.moveToTarget(() => {
+                        const cell = this.target.cell;
+                        
+                        if (cell.type === 'blueprint_demolish') {
+                            cell.health -= 2;
+                            sfx.playChop();
+                            createImpactParticles(cell.x * GRID_SIZE + 24, cell.y * GRID_SIZE + 24, '#64748b', 3, 'dust');
+                            
+                            if (cell.health <= 0) {
+                                const origType = cell.demolishTarget;
+                                const cost = getCost(origType);
+                                if (cost) {
+                                    resources.wood += Math.floor(cost.wood / 2);
+                                    resources.food += Math.floor(cost.food / 2);
+                                    addLog(`Deconstructed ${origType.toUpperCase()} (+50% refund)!`, 'text-amber-400');
+                                }
+                                cell.type = 'grass';
+                                cell.demolishTarget = null;
+                                sfx.playBuild();
+                                createImpactParticles(cell.x * GRID_SIZE + 24, cell.y * GRID_SIZE + 24, '#475569', 12, 'dust');
+                                recalculateLimits();
+                                updateUI();
+                                this.setTarget(null);
+                            } else {
+                                this.actionCooldown = 25;
+                            }
+                            return;
+                        }
+
+                        if (cell.type.startsWith('blueprint_')) {
+                            const finalType = cell.type.replace('blueprint_', '');
+                            cell.type = finalType;
+                            cell.health = 100;
+                            sfx.playBuild();
+                            createImpactParticles(cell.x*GRID_SIZE+24, cell.y*GRID_SIZE+24, '#8b5cf6');
+                            addLog(`Villager completed ${finalType.toUpperCase()}!`, 'text-indigo-400');
+                            
+                            if (finalType === 'farm' && !cell.cropType) {
+                                cell.cropType = ['wheat', 'pumpkin', 'cabbage'][Math.floor(Math.random() * 3)];
+                            } else if (finalType === 'house') {
+                                if (cell.houseVariant === undefined || cell.houseVariant === null) {
+                                    cell.houseVariant = Math.floor(Math.random() * 3);
+                                }
+                                recalculateLimits();
+                            }
+                        }
+                        this.setTarget(null);
+                    });
+                }
+            }
+
+            handleSoldierCombat() {
+                // Sight / Detection: Chase monsters if they see them (within 250px of the soldier's CURRENT position)
+                let nearestEnemy = null;
+                let minDist = 250; 
+                for (let e of enemies) {
+                    let d = Math.hypot(e.x - this.x, e.y - this.y);
+                    if (d < minDist) {
+                        minDist = d;
+                        nearestEnemy = e;
+                    }
+                }
+
+                if (nearestEnemy) {
+                    if (this.target && this.target.type === 'enemy' && this.target.entity === nearestEnemy) {
+                        let moveDist = Math.hypot(nearestEnemy.x - this.target.x, nearestEnemy.y - this.target.y);
+                        if (moveDist > 24) {
+                            this.setTarget({
+                                x: nearestEnemy.x,
+                                y: nearestEnemy.y,
+                                type: 'enemy',
+                                entity: nearestEnemy
+                            });
+                        }
+                    } else {
+                        this.setTarget({
+                            x: nearestEnemy.x,
+                            y: nearestEnemy.y,
+                            type: 'enemy',
+                            entity: nearestEnemy
+                        });
+                    }
+
+                    this.moveToTarget(() => {
+                        sfx.playSlash();
+                        createImpactParticles(nearestEnemy.x, nearestEnemy.y, '#e2e8f0', 8);
+                        nearestEnemy.health -= 6 + Math.random() * 3;
+                        this.actionCooldown = 30;
+                        
+                        if (nearestEnemy.health <= 0) {
+                            const index = enemies.indexOf(nearestEnemy);
+                            if (index > -1) {
+                                enemies.splice(index, 1);
+                                resources.food += 3;
+                                addLog("Your Soldier vanquished a Shadow Beast! (+3 Food)", "text-sky-300");
+                                updateUI();
+                            }
+                            this.setTarget(null);
+                        }
+                    });
+                } else {
+                    // Patrol mode: wander inside a strict 10x10 tile bounding area (±240px) centered around barracks
+                    if (!this.target) {
+                        let rx = this.homeX + (Math.random() - 0.5) * 480;
+                        let ry = this.homeY + (Math.random() - 0.5) * 480;
+                        
+                        rx = Math.max(GRID_SIZE, Math.min(MAP_SIZE - GRID_SIZE, rx));
+                        ry = Math.max(GRID_SIZE, Math.min(MAP_SIZE - GRID_SIZE, ry));
+
+                        this.setTarget({ x: rx, y: ry });
+                    }
+
+                    this.moveToTarget(() => {
+                        this.setTarget(null);
+                        this.actionCooldown = 40 + Math.random() * 40;
+                    });
+                }
+            }
+
+            moveToTarget(onArrived) {
+                if (!this.target) return;
+
+                if (!this.path || this.path.length === 0) {
+                    let startX = Math.floor(this.x / GRID_SIZE);
+                    let startY = Math.floor(this.y / GRID_SIZE);
+                    let targetX = Math.floor(this.target.x / GRID_SIZE);
+                    let targetY = Math.floor(this.target.y / GRID_SIZE);
+
+                    this.path = findPath(startX, startY, targetX, targetY);
+
+                    if (!this.path || this.path.length === 0) {
+                        this.path = [{ x: this.target.x, y: this.target.y }];
+                    }
+                }
+
+                let nextNode = this.path[0];
+                const dx = nextNode.x - this.x;
+                const dy = nextNode.y - this.y;
+                const dist = Math.hypot(dx, dy);
+
+                let nodeArrivalDist = 8;
+                if (this.path.length === 1 && (this.target.type === 'tree' || this.target.type === 'build' || this.target.type === 'farm')) {
+                    nodeArrivalDist = 32;
+                }
+
+                if (dist < nodeArrivalDist) {
+                    this.path.shift();
+                    if (this.path.length === 0) {
+                        onArrived();
+                    }
+                } else {
+                    const stepX = (dx / dist) * this.speed;
+                    const stepY = (dy / dist) * this.speed;
+
+                    if (!canPassThrough(this.x + stepX, this.y + stepY)) {
+                        this.path = [];
+                        return;
+                    }
+
+                    if (canPassThrough(this.x + stepX, this.y)) {
+                        this.x += stepX;
+                    }
+                    if (canPassThrough(this.x, this.y + stepY)) {
+                        this.y += stepY;
+                    }
+                }
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color, type = 'impact') {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                
+                if (type === 'smoke') {
+                    this.vx = (Math.random() - 0.5) * 0.4;
+                    this.vy = -0.3 - Math.random() * 0.5;
+                    this.life = 1.0;
+                    this.decay = 0.007 + Math.random() * 0.008;
+                    this.size = 2 + Math.random() * 4;
+                } else if (type === 'spark') {
+                    this.vx = (Math.random() - 0.5) * 1.2;
+                    this.vy = -0.5 - Math.random() * 0.8;
+                    this.life = 1.0;
+                    this.decay = 0.02 + Math.random() * 0.02;
+                    this.size = 1 + Math.random() * 1.5;
+                } else if (type === 'dust') {
+                    this.vx = (Math.random() - 0.5) * 1.0;
+                    this.vy = -0.1 - Math.random() * 0.3;
+                    this.life = 0.8;
+                    this.decay = 0.015 + Math.random() * 0.015;
+                    this.size = 1.5 + Math.random() * 2;
+                } else {
+                    this.vx = (Math.random() - 0.5) * 4;
+                    this.vy = (Math.random() - 0.5) * 4 - 1;
+                    this.life = 1.0;
+                    this.decay = 0.02 + Math.random() * 0.03;
+                    this.size = 2 + Math.random() * 4;
+                }
+                this.color = color;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+                if (this.type === 'smoke') {
+                    this.size += 0.06;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createImpactParticles(x, y, color, count = 6, type = 'impact') {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color, type));
+            }
+        }
+
+        function setupVillagers() {
+            villagers = [];
+            const centerTile = Math.floor(MAP_TILES / 2) * GRID_SIZE + GRID_SIZE/2;
+            for (let i = 0; i < 4; i++) {
+                const rx = centerTile + (Math.random() - 0.5) * 120;
+                const ry = centerTile + (Math.random() - 0.5) * 120;
+                villagers.push(new Villager(rx, ry));
+            }
+        }
+
+        const buildButtons = document.querySelectorAll('.build-btn');
+        buildButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (gameOverActive) return; // Block during Game Over
+                const isSelected = this.classList.contains('border-amber-500') || 
+                                   this.classList.contains('border-emerald-500') || 
+                                   this.classList.contains('border-sky-500') || 
+                                   this.classList.contains('border-blue-500') ||
+                                   this.classList.contains('border-rose-500');
+                
+                if (isSelected) {
+                    unequipBuildOption();
+                } else {
+                    buildButtons.forEach(b => {
+                        b.classList.remove('border-amber-500', 'border-emerald-500', 'border-sky-500', 'border-blue-500', 'border-rose-500');
+                        b.classList.add('border-slate-800');
+                    });
+
+                    selectedBuildOption = this.getAttribute('data-type');
+                    if (selectedBuildOption === 'wall') this.classList.add('border-amber-500');
+                    if (selectedBuildOption === 'farm') this.classList.add('border-emerald-500');
+                    if (selectedBuildOption === 'house') this.classList.add('border-sky-500');
+                    if (selectedBuildOption === 'tower') this.classList.add('border-rose-500');
+                    if (selectedBuildOption === 'barracks') this.classList.add('border-blue-500');
+                    if (selectedBuildOption === 'lumber_generator') this.classList.add('border-amber-500');
+                    this.classList.remove('border-slate-800');
+                    
+                    addLog(`Selected: Build ${selectedBuildOption.toUpperCase()}. Choose empty grass patch.`, 'text-sky-300');
+                    updateToolButtonUI();
+                }
+            });
+        });
+
+        function unequipBuildOption() {
+            selectedBuildOption = null;
+            buildButtons.forEach(b => {
+                b.classList.remove('border-amber-500', 'border-emerald-500', 'border-sky-500', 'border-blue-500', 'border-rose-500');
+                b.classList.add('border-slate-800');
+            });
+            addLog("Unequipped tool. Ready to chop trees and harvest crops!", "text-amber-500");
+            updateToolButtonUI();
+        }
+
+        const interactModeBtn = document.getElementById('btn-interact-mode');
+        const demolishModeBtn = document.getElementById('btn-demolish-mode');
+
+        interactModeBtn.addEventListener('click', function() {
+            if (gameOverActive) return; // Block during Game Over
+            unequipBuildOption();
+        });
+
+        demolishModeBtn.addEventListener('click', function() {
+            if (gameOverActive) return; // Block during Game Over
+            if (selectedBuildOption === 'demolish') {
+                unequipBuildOption();
+            } else {
+                buildButtons.forEach(b => {
+                    b.classList.remove('border-amber-500', 'border-emerald-500', 'border-sky-500', 'border-blue-500', 'border-rose-500');
+                    b.classList.add('border-slate-800');
+                });
+                selectedBuildOption = 'demolish';
+                addLog("Demolish Mode active. Click any structure or blueprint to mark it for deconstruction.", "text-rose-400 font-semibold");
+                updateToolButtonUI();
+            }
+        });
+
+        function updateToolButtonUI() {
+            interactModeBtn.className = "py-3 px-4 bg-slate-800 text-slate-400 hover:bg-slate-700 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 border-2 border-transparent";
+            demolishModeBtn.className = "py-3 px-4 bg-slate-800 text-slate-400 hover:bg-slate-700 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 border-2 border-transparent";
+
+            if (selectedBuildOption === null) {
+                interactModeBtn.className = "py-3 px-4 bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 border-2 border-amber-300";
+            } else if (selectedBuildOption === 'demolish') {
+                demolishModeBtn.className = "py-3 px-4 bg-rose-600 text-white hover:bg-rose-500 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 border-2 border-rose-400";
+            }
+        }
+
+        document.querySelectorAll('.job-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (gameOverActive) return; // Block during Game Over
+                const job = this.getAttribute('data-job');
+                const action = this.getAttribute('data-action');
+
+                let assignedCount = villagers.filter(v => v.job !== 'idle').length;
+                let idleVillagers = villagers.filter(v => v.job === 'idle');
+                let jobVillagers = villagers.filter(v => v.job === job);
+
+                if (action === 'add' && idleVillagers.length > 0) {
+                    idleVillagers[0].job = job;
+                    idleVillagers[0].setTarget(null);
+                    sfx.playTing();
+                } else if (action === 'remove' && jobVillagers.length > 0) {
+                    jobVillagers[0].job = 'idle';
+                    jobVillagers[0].setTarget(null);
+                    sfx.playTing();
+                }
+                updateUI();
+            });
+        });
+
+        function recalculateLimits() {
+            let houseCount = 0;
+            for (let x = 0; x < MAP_TILES; x++) {
+                for (let y = 0; y < MAP_TILES; y++) {
+                    if (grid[x][y].type === 'house') houseCount++;
+                }
+            }
+            popLimit = 5 + (houseCount * 3);
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('res-wood').innerText = resources.wood;
+            document.getElementById('res-food').innerText = resources.food;
+            
+            const woodcutters = villagers.filter(v => v.job === 'woodcutter').length;
+            const farmers = villagers.filter(v => v.job === 'farmer').length;
+            const builders = villagers.filter(v => v.job === 'builder').length;
+            const soldiers = villagers.filter(v => v.job === 'soldier').length;
+            const idles = villagers.length - (woodcutters + farmers + builders + soldiers);
+            
+            const nonSoldierCount = villagers.length - soldiers;
+            document.getElementById('res-pop').innerText = `${nonSoldierCount} / ${popLimit}`;
+            document.getElementById('res-day').innerText = dayCount;
+
+            document.getElementById('job-woodcutter').innerText = woodcutters;
+            document.getElementById('job-farmer').innerText = farmers;
+            document.getElementById('job-builder').innerText = builders;
+            
+            document.getElementById('unassigned-count').innerText = `Idle: ${idles}`;
+        }
+
+        function getCost(type) {
+            if (type === 'wall') return { wood: 10, food: 0 };
+            if (type === 'farm') return { wood: 15, food: 0 };
+            if (type === 'house') return { wood: 35, food: 0 };
+            if (type === 'tower') return { wood: 40, food: 10 };
+            if (type === 'barracks') return { wood: 50, food: 15 };
+            if (type === 'lumber_generator') return { wood: 40, food: 5 };
+            return null;
+        }
+
+        let camera = {
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0
+        };
+
+        function updateCamera() {
+            camera.width = canvas.width;
+            camera.height = canvas.height;
+            camera.x = player.x - camera.width / 2;
+            camera.y = player.y - camera.height / 2;
+
+            camera.x = Math.max(0, Math.min(MAP_SIZE - camera.width, camera.x));
+            camera.y = Math.max(0, Math.min(MAP_SIZE - camera.height, camera.y));
+        }
+
+        let keys = {};
+        window.addEventListener('keydown', (e) => {
+            if (gameOverActive) return;
+            keys[e.key.toLowerCase()] = true;
+            if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault();
+                performChopAction();
+            }
+            if (e.key === 'Escape' || e.key === 'Esc') {
+                unequipBuildOption();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        document.getElementById('key-up').addEventListener('touchstart', (e) => { e.preventDefault(); keys['w'] = true; });
+        document.getElementById('key-up').addEventListener('touchend', () => { keys['w'] = false; });
+        document.getElementById('key-down').addEventListener('touchstart', (e) => { e.preventDefault(); keys['s'] = true; });
+        document.getElementById('key-down').addEventListener('touchend', () => { keys['s'] = false; });
+        document.getElementById('key-left').addEventListener('touchstart', (e) => { e.preventDefault(); keys['a'] = true; });
+        document.getElementById('key-left').addEventListener('touchend', () => { keys['a'] = false; });
+        document.getElementById('key-right').addEventListener('touchstart', (e) => { e.preventDefault(); keys['d'] = true; });
+        document.getElementById('key-right').addEventListener('touchend', () => { keys['d'] = false; });
+        document.getElementById('key-chop').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            performChopAction();
+        });
+
+        function handlePlayerMovement() {
+            if (gameOverActive) return;
+            let dx = 0;
+            let dy = 0;
+
+            if (keys['w'] || keys['arrowup']) dy = -1;
+            if (keys['s'] || keys['arrowdown']) dy = 1;
+            if (keys['a'] || keys['arrowleft']) { dx = -1; player.facingLeft = true; }
+            if (keys['d'] || keys['arrowright']) { dx = 1; player.facingLeft = false; }
+
+            if (dx !== 0 && dy !== 0) {
+                dx *= 0.7071;
+                dy *= 0.7071;
+            }
+
+            const stepX = dx * player.speed;
+            const stepY = dy * player.speed;
+
+            if (canPassThrough(player.x + stepX, player.y)) {
+                player.x += stepX;
+            }
+            if (canPassThrough(player.x, player.y + stepY)) {
+                player.y += stepY;
+            }
+
+            const distToCamp = Math.hypot(player.x - MAP_SIZE/2, player.y - MAP_SIZE/2);
+            if (distToCamp < 120 && player.health < player.maxHealth) {
+                player.health = Math.min(player.maxHealth, player.health + 0.15);
+            }
+
+            if (player.swinging) {
+                player.swingAngle += 0.25;
+                if (player.swingAngle >= Math.PI) {
+                    player.swinging = false;
+                    player.swingAngle = 0;
+                }
+            }
+        }
+
+        function performChopAction() {
+            if (gameOverActive) return;
+            player.swinging = true;
+            player.swingAngle = 0;
+
+            let nearestTree = null;
+            let minDist = 75;
+
+            for (let x = 0; x < MAP_TILES; x++) {
+                for (let y = 0; y < MAP_TILES; y++) {
+                    if (grid[x][y].type === 'tree') {
+                        let tx = x * GRID_SIZE + 24;
+                        let ty = y * GRID_SIZE + 24;
+                        let d = Math.hypot(tx - player.x, ty - player.y);
+                        if (d < minDist) {
+                            minDist = d;
+                            nearestTree = grid[x][y];
+                        }
+                    }
+                }
+            }
+
+            if (nearestTree) {
+                nearestTree.health -= 1;
+                sfx.playChop();
+                createImpactParticles(nearestTree.x * GRID_SIZE + 24, nearestTree.y * GRID_SIZE + 24, '#22c55e', 8);
+
+                if (nearestTree.health <= 0) {
+                    nearestTree.type = 'grass';
+                    resources.wood += 8;
+                    addLog("Chipped and chopped down a tall tree! (+8 Wood)", "text-amber-500 font-medium");
+                    updateUI();
+                }
+            }
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (gameOverActive) return;
+            if (e.button === 2) {
+                e.preventDefault();
+                unequipBuildOption();
+                return;
+            }
+
+            const rect = canvas.getBoundingClientRect();
+            const clickX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+            const clickY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+
+            const mapX = clickX + camera.x;
+            const mapY = clickY + camera.y;
+
+            const tx = Math.floor(mapX / GRID_SIZE);
+            const ty = Math.floor(mapY / GRID_SIZE);
+
+            if (tx >= 0 && tx < MAP_TILES && ty >= 0 && ty < MAP_TILES) {
+                const cell = grid[tx][ty];
+
+                if (selectedBuildOption === 'demolish') {
+                    if (cell.type !== 'grass' && cell.type !== 'tree' && cell.type !== 'campfire') {
+                        if (cell.type.startsWith('blueprint_')) {
+                            const blueprintType = cell.type.replace('blueprint_', '');
+                            const cost = getCost(blueprintType);
+                            if (cost) {
+                                resources.wood += cost.wood;
+                                resources.food += cost.food;
+                            }
+                            cell.type = 'grass';
+                            cell.demolishTarget = null;
+                            sfx.playHit();
+                            createImpactParticles(tx * GRID_SIZE + 24, ty * GRID_SIZE + 24, '#a855f7', 8, 'dust');
+                            addLog("Blueprint construction canceled! Full cost refunded.", "text-slate-400");
+                        } else {
+                            cell.demolishTarget = cell.type;
+                            cell.type = 'blueprint_demolish';
+                            cell.health = 10;
+                            sfx.playHit();
+                            createImpactParticles(tx * GRID_SIZE + 24, ty * GRID_SIZE + 24, '#ef4444', 6, 'dust');
+                            addLog(`Marked structure for demolition! Builders will dismantle it.`, "text-rose-400");
+                        }
+                        updateUI();
+                    } else {
+                        triggerToast("Nothing to demolish on this tile!");
+                        sfx.playHit();
+                    }
+                    return;
+                }
+
+                if (!selectedBuildOption) {
+                    if (cell.type === 'barracks') {
+                        let barracksX = cell.x * GRID_SIZE + GRID_SIZE / 2;
+                        let barracksY = cell.y * GRID_SIZE + GRID_SIZE / 2;
+                        
+                        let localSoldiersCount = villagers.filter(v => v.job === 'soldier' && v.homeX === barracksX && v.homeY === barracksY).length;
+
+                        if (localSoldiersCount < 10) {
+                            if (resources.food >= 25) {
+                                resources.food -= 25;
+                                
+                                let spawnX = barracksX;
+                                let spawnY = barracksY;
+                                
+                                const offsets = [
+                                    {x: 0, y: 1},
+                                    {x: 1, y: 0},
+                                    {x: 0, y: -1},
+                                    {x: -1, y: 0}
+                                ];
+                                for (let offset of offsets) {
+                                    let txAdjacent = cell.x + offset.x;
+                                    let tyAdjacent = cell.y + offset.y;
+                                    if (canPassTile(txAdjacent, tyAdjacent)) {
+                                        spawnX = txAdjacent * GRID_SIZE + GRID_SIZE / 2;
+                                        spawnY = tyAdjacent * GRID_SIZE + GRID_SIZE / 2;
+                                        break;
+                                    }
+                                }
+                                
+                                let newSoldier = new Villager(spawnX, spawnY);
+                                newSoldier.job = 'soldier';
+                                newSoldier.homeX = barracksX;
+                                newSoldier.homeY = barracksY;
+                                
+                                villagers.push(newSoldier);
+                                sfx.playTing();
+                                createImpactParticles(spawnX, spawnY, '#e2e8f0', 10);
+                                addLog(`Recruited Soldier #${localSoldiersCount + 1} at the Barracks! (-25 Food)`, "text-sky-400 font-bold");
+                                updateUI();
+                            } else {
+                                triggerToast("Need 25 Food to train a Soldier!");
+                                sfx.playHit();
+                            }
+                        } else {
+                            triggerToast("Barracks limit of 10 Soldiers reached!");
+                            sfx.playHit();
+                        }
+                        return;
+                    }
+
+                    if (cell.type === 'farm' && cell.growth >= 100) {
+                        cell.growth = 0;
+                        resources.food += 10;
+                        sfx.playTing();
+                        createImpactParticles(tx*GRID_SIZE+24, ty*GRID_SIZE+24, '#eab308');
+                        addLog(`Harvested delicious golden ${cell.cropType.toUpperCase()}! (+10 Food)`, "text-emerald-400 font-bold");
+                        updateUI();
+                    } else if (cell.type === 'tree') {
+                        const dx = (cell.x * GRID_SIZE + 24) - player.x;
+                        const dy = (cell.y * GRID_SIZE + 24) - player.y;
+                        if (Math.hypot(dx, dy) < 80) {
+                            performChopAction();
+                        } else {
+                            addLog("Walk closer to chop down the tree!", "text-slate-400");
+                        }
+                    }
+                    return;
+                }
+
+                const cost = getCost(selectedBuildOption);
+                if (cost && resources.wood >= cost.wood && resources.food >= cost.food) {
+                    
+                    if (cell.type !== 'grass') {
+                        triggerToast("Cannot build here! Obstacle must be cleared first.");
+                        sfx.playHit();
+                        return;
+                    }
+
+                    if (isEntityOverlappingTile(tx, ty)) {
+                        triggerToast("Cannot build here! Player or villager is in the way.");
+                        sfx.playHit();
+                        return;
+                    }
+
+                    resources.wood -= cost.wood;
+                    resources.food -= cost.food;
+
+                    if (selectedBuildOption === 'farm') {
+                        cell.cropType = ['wheat', 'pumpkin', 'cabbage'][Math.floor(Math.random() * 3)];
+                    } else if (selectedBuildOption === 'house') {
+                        cell.houseVariant = Math.floor(Math.random() * 3); 
+                    } else if (selectedBuildOption === 'wall') {
+                        cell.wallVariant = Math.floor(Math.random() * 3);
+                    }
+
+                    cell.type = `blueprint_${selectedBuildOption}`;
+                    cell.health = 10;
+                    cell.growth = 0;
+
+                    sfx.playBuild();
+                    addLog(`Placed blueprint for ${selectedBuildOption.toUpperCase()}! Builders assigned will construct it.`, "text-indigo-400");
+                    updateUI();
+                } else {
+                    triggerToast("Insufficient resources to construct!");
+                    sfx.playHit();
+                }
+            }
+        });
+
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+            const mouseY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+
+            const mapX = mouseX + camera.x;
+            const mapY = mouseY + camera.y;
+
+            mouseTileX = Math.floor(mapX / GRID_SIZE);
+            mouseTileY = Math.floor(mapY / GRID_SIZE);
+        });
+
+        function handleTimeCycle() {
+            if (gameOverActive) return;
+            dayTime += 0.45;
+
+            if (dayTime >= 2400) {
+                dayTime = 0;
+                dayCount++;
+                addLog(`Day ${dayCount} approaches. Harvest crops and enjoy expanding your land!`, 'text-indigo-400 font-bold');
+                updateUI();
+            }
+
+            const prevNight = isNight;
+            isNight = (dayTime > 1800 || dayTime < 600);
+
+            if (isNight !== prevNight) {
+                sfx.playDayNight(isNight);
+                if (isNight) {
+                    addLog("🌙 Nightfall has arrived. Mischievous Shadow Beasts emerge!", 'text-indigo-300 font-semibold');
+                    document.getElementById('time-banner').className = "bg-indigo-950/60 border border-indigo-800/60 p-3 rounded-xl flex items-center justify-between";
+                    document.getElementById('time-label').innerText = "Cozy Starry Night";
+                    document.getElementById('time-icon').innerText = "🌙";
+                    
+                    spawnCozyThreats();
+                } else {
+                    addLog("☀️ Dawn arrives. Clear trees, harvest food, and plan cottages.", 'text-emerald-400 font-bold');
+                    document.getElementById('time-banner').className = "bg-indigo-950/40 border border-indigo-800/60 p-3 rounded-xl flex items-center justify-between";
+                    document.getElementById('time-label').innerText = "Morning Settles In";
+                    document.getElementById('time-icon').innerText = "☀️";
+                    handleMigrants();
+                }
+            }
+
+            const hours = Math.floor(dayTime / 100);
+            const minutes = Math.floor((dayTime % 100) * 0.6);
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const formattedHrs = hours % 12 === 0 ? 12 : hours % 12;
+            const formattedMins = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('time-clock').innerText = `${formattedHrs}:${formattedMins} ${ampm}`;
+        }
+
+        function spawnCozyThreats() {
+            const count = 2 + Math.floor(dayCount * 3) + Math.floor(Math.pow(dayCount, 1.5));
+            addLog(`The forest gets wilder... ${count} Shadow Beasts have spawned!`, 'text-rose-400 font-semibold');
+            for (let i = 0; i < count; i++) {
+                enemies.push(new Beast());
+            }
+        }
+
+        function handleMigrants() {
+            const nonSoldierCount = villagers.filter(v => v.job !== 'soldier').length;
+            if (nonSoldierCount < popLimit) {
+                const center = Math.floor(MAP_TILES / 2) * GRID_SIZE + GRID_SIZE/2;
+                villagers.push(new Villager(center + 20, center + 20));
+                addLog("A wandering builder has joined your settlement!", "text-sky-400 font-bold");
+                updateUI();
+            } else {
+                addLog("A wanderer passed by, but you need cottages to house them!", "text-slate-500");
+            }
+        }
+
+        function updateCropGrowth() {
+            for (let x = 0; x < MAP_TILES; x++) {
+                for (let y = 0; y < MAP_TILES; y++) {
+                    const cell = grid[x][y];
+                    if (cell.type === 'farm') {
+                        if (cell.growth < 100) {
+                            cell.growth += 0.05;
+                        }
+                    }
+                }
+            }
+        }
+
+        function updateDefenseTowers() {
+            for (let x = 0; x < MAP_TILES; x++) {
+                for (let y = 0; y < MAP_TILES; y++) {
+                    if (grid[x][y].type === 'tower') {
+                        let nearestEnemy = null;
+                        let minDist = 240;
+                        const tx = x * GRID_SIZE + 24;
+                        const ty = y * GRID_SIZE + 24;
+
+                        for (let e of enemies) {
+                            const d = Math.hypot(e.x - tx, e.y - ty);
+                            if (d < minDist) {
+                                minDist = d;
+                                nearestEnemy = e;
+                            }
+                        }
+
+                        if (nearestEnemy && Math.random() < 0.025) {
+                            sfx.playArrow();
+                            projectiles.push({
+                                x: tx,
+                                y: ty,
+                                target: nearestEnemy,
+                                speed: 6,
+                                damage: 10
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        function updateProjectiles() {
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                const p = projectiles[i];
+                if (!enemies.includes(p.target)) {
+                    projectiles.splice(i, 1);
+                    continue;
+                }
+
+                const dx = p.target.x - p.x;
+                const dy = p.target.y - p.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist < 10) {
+                    p.target.health -= p.damage;
+                    createImpactParticles(p.target.x, p.target.y, '#eab308', 4);
+                    projectiles.splice(i, 1);
+
+                    if (p.target.health <= 0) {
+                        const index = enemies.indexOf(p.target);
+                        if (index > -1) {
+                            enemies.splice(index, 1);
+                            resources.food += 3;
+                            addLog("Tower defeated a Shadow Beast! (+3 Food)", 'text-emerald-400');
+                            updateUI();
+                        }
+                    }
+                } else {
+                    p.x += (dx / dist) * p.speed;
+                    p.y += (dy / dist) * p.speed;
+                }
+            }
+        }
+
+        function runAmbientParticles() {
+            if (Math.random() < 0.15) {
+                const center = Math.floor(MAP_TILES / 2) * GRID_SIZE + GRID_SIZE/2;
+                createImpactParticles(center + (Math.random() - 0.5) * 12, center + (Math.random() - 0.5) * 8, '#f97316', 1, 'spark');
+            }
+
+            for (let x = 0; x < MAP_TILES; x++) {
+                for (let y = 0; y < MAP_TILES; y++) {
+                    const cell = grid[x][y];
+                    
+                    if (cell.type === 'house') {
+                        if (Math.random() < 0.04) {
+                            const px = x * GRID_SIZE + 14; 
+                            const py = y * GRID_SIZE + 8;
+                            particles.push(new Particle(px, py, 'rgba(148, 163, 184, 0.4)', 'smoke'));
+                        }
+                    } else if (cell.type === 'tower') {
+                        if (Math.random() < 0.03) {
+                            const px = x * GRID_SIZE + 16;
+                            const py = y * GRID_SIZE + 28;
+                            createImpactParticles(px, py, '#fef08a', 1, 'spark');
+                        }
+                    } else if (cell.type.startsWith('blueprint_')) {
+                        if (Math.random() < 0.02) {
+                            const px = x * GRID_SIZE + 10 + Math.random() * 28;
+                            const py = y * GRID_SIZE + 20 + Math.random() * 20;
+                            particles.push(new Particle(px, py, 'rgba(139, 92, 246, 0.45)', 'dust'));
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawMap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const startX = Math.max(0, Math.floor(camera.x / GRID_SIZE));
+            const endX = Math.min(MAP_TILES, Math.ceil((camera.x + camera.width) / GRID_SIZE));
+            const startY = Math.max(0, Math.floor(camera.y / GRID_SIZE));
+            const endY = Math.min(MAP_TILES, Math.ceil((camera.y + camera.height) / GRID_SIZE));
+
+            const timeSec = Date.now() * 0.003;
+
+            for (let x = startX; x < endX; x++) {
+                for (let y = startY; y < endY; y++) {
+                    const cell = grid[x][y];
+                    const px = x * GRID_SIZE - camera.x;
+                    const py = y * GRID_SIZE - camera.y;
+
+                    ctx.fillStyle = '#14532d'; 
+                    ctx.fillRect(px, py, GRID_SIZE, GRID_SIZE);
+                    ctx.strokeStyle = '#166534';
+                    ctx.strokeRect(px, py, GRID_SIZE, GRID_SIZE);
+
+                    if (cell.decoration === 1) {
+                        ctx.fillStyle = '#facc15';
+                        ctx.beginPath();
+                        ctx.arc(px + 12, py + 12, 2.5, 0, Math.PI * 2);
+                        ctx.arc(px + 36, py + 28, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#22c55e';
+                        ctx.fillRect(px + 11, py + 14, 2, 4);
+                    } else if (cell.decoration === 2) {
+                        ctx.fillStyle = '#4ade80';
+                        ctx.beginPath();
+                        ctx.arc(px + 24, py + 18, 2, 0, Math.PI * 2);
+                        ctx.arc(px + 21, py + 22, 2, 0, Math.PI * 2);
+                        ctx.arc(px + 27, py + 22, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (cell.decoration === 3) {
+                        ctx.fillStyle = '#64748b';
+                        ctx.beginPath();
+                        ctx.arc(px + 30, py + 36, 3, 0, Math.PI * 2);
+                        ctx.arc(px + 34, py + 38, 1.8, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    let isBlueprint = cell.type.startsWith('blueprint_');
+                    let isDemolish = cell.type === 'blueprint_demolish';
+                    let actualType = isBlueprint ? (isDemolish ? cell.demolishTarget : cell.type.replace('blueprint_', '')) : cell.type;
+
+                    ctx.save();
+                    if (isBlueprint) {
+                        ctx.globalAlpha = 0.45;
+                    }
+
+                    if (actualType === 'tree') {
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.25)';
+                        ctx.beginPath();
+                        ctx.ellipse(px + 24, py + 42, 16, 6, 0, 0, Math.PI*2);
+                        ctx.fill();
+
+                        let leafColorDark = '#064e3b';
+                        let leafColorLight = '#0f766e';
+                        if (cell.treeVariant === 1) {
+                            leafColorDark = '#14532d';
+                            leafColorLight = '#22c55e';
+                        } else if (cell.treeVariant === 2) {
+                            leafColorDark = '#7c2d12';
+                            leafColorLight = '#d97706';
+                        }
+
+                        ctx.fillStyle = leafColorDark;
+                        ctx.beginPath();
+                        ctx.moveTo(px + 24, py + 4);
+                        ctx.lineTo(px + 6, py + 34);
+                        ctx.lineTo(px + 42, py + 34);
+                        ctx.fill();
+
+                        ctx.fillStyle = leafColorLight;
+                        ctx.beginPath();
+                        ctx.moveTo(px + 24, py + 12);
+                        ctx.lineTo(px + 10, py + 38);
+                        ctx.lineTo(px + 36, py + 38);
+                        ctx.fill();
+
+                        ctx.fillStyle = '#451a03';
+                        ctx.fillRect(px + 20, py + 38, 8, 8);
+                        
+                        if (cell.health < 4) {
+                            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                            ctx.fillRect(px + 4, py + 42, 40, 5);
+                            ctx.fillStyle = '#ef4444';
+                            ctx.fillRect(px + 4, py + 42, (cell.health / 4) * 40, 5);
+                        }
+                    } else if (actualType === 'campfire') {
+                        ctx.fillStyle = '#475569';
+                        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+                            const sx = px + 24 + Math.cos(a) * 15;
+                            const sy = py + 24 + Math.sin(a) * 15;
+                            ctx.beginPath();
+                            ctx.arc(sx, sy, 3.5, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+
+                        const flickerSize = 10 + Math.random() * 4;
+                        ctx.fillStyle = '#ea580c';
+                        ctx.beginPath();
+                        ctx.arc(px + 24, py + 24, flickerSize, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.fillStyle = '#eab308';
+                        ctx.beginPath();
+                        ctx.arc(px + 24, py + 24, flickerSize * 0.6, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (actualType === 'wall') {
+                        ctx.fillStyle = '#7c2d12'; 
+                        ctx.fillRect(px + 4, py + 4, GRID_SIZE - 8, GRID_SIZE - 8);
+
+                        ctx.fillStyle = '#9a3412';
+                        ctx.fillRect(px + 6, py + 8, GRID_SIZE - 12, 8);
+                        ctx.fillRect(px + 6, py + 20, GRID_SIZE - 12, 8);
+                        ctx.fillRect(px + 6, py + 32, GRID_SIZE - 12, 8);
+
+                        ctx.fillStyle = '#ea580c';
+                        ctx.beginPath();
+                        ctx.arc(px + 8, py + 12, 3, 0, Math.PI*2);
+                        ctx.arc(px + 8, py + 24, 3, 0, Math.PI*2);
+                        ctx.arc(px + 8, py + 36, 3, 0, Math.PI*2);
+                        ctx.arc(px + 40, py + 12, 3, 0, Math.PI*2);
+                        ctx.arc(px + 40, py + 24, 3, 0, Math.PI*2);
+                        ctx.arc(px + 40, py + 36, 3, 0, Math.PI*2);
+                        ctx.fill();
+
+                        ctx.fillStyle = '#16a34a';
+                        ctx.beginPath();
+                        ctx.arc(px + 14, py + 6, 4, 0, Math.PI*2);
+                        ctx.arc(px + 32, py + 38, 5, 0, Math.PI*2);
+                        ctx.fill();
+
+                        ctx.fillStyle = '#475569';
+                        ctx.fillRect(px + 18, py + 4, 3, GRID_SIZE - 8);
+                        ctx.fillRect(px + 27, py + 4, 3, GRID_SIZE - 8);
+                    } else if (actualType === 'farm') {
+                        ctx.fillStyle = '#451a03';
+                        ctx.fillRect(px + 4, py + 4, GRID_SIZE - 8, GRID_SIZE - 8);
+
+                        let crop = cell.cropType;
+                        if (!crop) crop = 'wheat';
+
+                        let growthVal = isBlueprint ? 60 : cell.growth;
+
+                        if (growthVal > 0) {
+                            const isRipe = growthVal >= 100;
+                            const h = (growthVal / 100) * 16;
+
+                            if (crop === 'pumpkin') {
+                                ctx.strokeStyle = '#16a34a';
+                                ctx.lineWidth = 2.5;
+                                ctx.beginPath();
+                                ctx.arc(px + 24, py + 24, 12, 0, Math.PI);
+                                ctx.stroke();
+
+                                if (isRipe || isBlueprint) {
+                                    ctx.fillStyle = '#ea580c';
+                                    ctx.beginPath();
+                                    ctx.ellipse(px + 24, py + 22, 10, 8, 0, 0, Math.PI * 2);
+                                    ctx.fill();
+                                    ctx.strokeStyle = '#c2410c';
+                                    ctx.lineWidth = 1;
+                                    ctx.beginPath();
+                                    ctx.ellipse(px + 24, py + 22, 5, 8, 0, 0, Math.PI * 2);
+                                    ctx.stroke();
+                                    ctx.fillStyle = '#15803d';
+                                    ctx.fillRect(px + 22, py + 10, 4, 5);
+                                } else {
+                                    ctx.fillStyle = '#854d0e';
+                                    ctx.beginPath();
+                                    ctx.arc(px + 18, py + 20, 3, 0, Math.PI*2);
+                                    ctx.arc(px + 30, py + 24, 4, 0, Math.PI*2);
+                                    ctx.fill();
+                                }
+                            } else if (crop === 'cabbage') {
+                                if (isRipe || isBlueprint) {
+                                    ctx.fillStyle = '#14532d'; 
+                                    ctx.beginPath();
+                                    ctx.arc(px + 24, py + 24, 11, 0, Math.PI * 2);
+                                    ctx.fill();
+                                    ctx.fillStyle = '#16a34a'; 
+                                    ctx.beginPath();
+                                    ctx.arc(px + 24, py + 24, 8, 0, Math.PI * 2);
+                                    ctx.fill();
+                                    ctx.fillStyle = '#4ade80'; 
+                                    ctx.beginPath();
+                                    ctx.arc(px + 24, py + 24, 5, 0, Math.PI * 2);
+                                    ctx.fill();
+                                    ctx.strokeStyle = '#f8fafc';
+                                    ctx.lineWidth = 1;
+                                    ctx.beginPath();
+                                    ctx.moveTo(px+16, py+24); ctx.lineTo(px+32, py+24);
+                                    ctx.moveTo(px+24, py+16); ctx.lineTo(px+24, py+32);
+                                    ctx.stroke();
+                                } else {
+                                    ctx.fillStyle = '#14532d';
+                                    ctx.beginPath();
+                                    ctx.arc(px + 24, py + 24, 4, 0, Math.PI * 2);
+                                    ctx.fill();
+                                }
+                            } else {
+                                ctx.fillStyle = (isRipe || isBlueprint) ? '#f59e0b' : '#4ade80';
+                                const cropCount = 4;
+                                const windOffset = Math.sin(timeSec + x) * 4;
+
+                                for (let i = 0; i < cropCount; i++) {
+                                    const cx = px + 10 + i * 8;
+                                    const cy = py + 32;
+                                    
+                                    ctx.beginPath();
+                                    ctx.moveTo(cx, cy);
+                                    ctx.quadraticCurveTo(cx, cy - h/2, cx + ((isRipe || isBlueprint) ? windOffset : 0), cy - h);
+                                    ctx.strokeStyle = (isRipe || isBlueprint) ? '#f59e0b' : '#22c55e';
+                                    ctx.lineWidth = 2.5;
+                                    ctx.stroke();
+
+                                    if (isRipe || isBlueprint) {
+                                        ctx.fillStyle = '#fef08a';
+                                        ctx.beginPath();
+                                        ctx.ellipse(cx + windOffset, cy - h, 3, 5, 0, 0, Math.PI*2);
+                                        ctx.fill();
+                                    }
+                                }
+                            }
+                        }
+                    } else if (actualType === 'house') {
+                        let variant = cell.houseVariant;
+                        if (variant === undefined || variant === null) variant = 0;
+
+                        ctx.fillStyle = '#334155';
+                        ctx.fillRect(px + 6, py + 26, 36, 18);
+                        
+                        ctx.fillStyle = '#fef08a'; 
+                        ctx.fillRect(px + 10, py + 20, 28, 18);
+
+                        ctx.fillStyle = '#451a03';
+                        ctx.fillRect(px + 8, py + 20, 4, 24);
+                        ctx.fillRect(px + 36, py + 20, 4, 24);
+
+                        ctx.fillStyle = '#475569';
+                        ctx.fillRect(px + 10, py + 4, 6, 16);
+                        ctx.fillStyle = '#1e293b';
+                        ctx.fillRect(px + 8, py + 2, 10, 3);
+
+                        ctx.fillStyle = '#7c2d12';
+                        ctx.fillRect(px + 28, py + 24, 8, 14);
+                        ctx.fillStyle = '#eab308'; 
+                        ctx.beginPath();
+                        ctx.arc(px + 30, py + 31, 1.5, 0, Math.PI*2);
+                        ctx.fill();
+
+                        if (variant === 1) {
+                            ctx.fillStyle = '#1e3a8a'; 
+                        } else if (variant === 2) {
+                            ctx.fillStyle = '#064e3b'; 
+                        } else {
+                            ctx.fillStyle = '#991b1b'; 
+                        }
+
+                        ctx.beginPath();
+                        ctx.moveTo(px + 24, py + 2);
+                        ctx.lineTo(px + 4, py + 20);
+                        ctx.lineTo(px + 44, py + 20);
+                        ctx.closePath();
+                        ctx.fill();
+
+                        ctx.fillStyle = isBlueprint ? '#1e293b' : '#fef08a';
+                        ctx.fillRect(px + 16, py + 24, 8, 8);
+                        ctx.strokeStyle = '#7c2d12';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(px + 16, py + 24, 8, 8);
+                    } else if (actualType === 'tower') {
+                        ctx.save();
+                        
+                        ctx.fillStyle = '#475569'; 
+                        ctx.fillRect(px + 8, py + 16, 32, 28);
+                        
+                        ctx.strokeStyle = '#1e293b';
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeRect(px + 8, py + 16, 32, 28);
+                        ctx.beginPath();
+                        ctx.moveTo(px + 8, py + 25); ctx.lineTo(px + 40, py + 25);
+                        ctx.moveTo(px + 8, py + 34); ctx.lineTo(px + 40, py + 34);
+                        ctx.moveTo(px + 18, py + 16); ctx.lineTo(px + 18, py + 25);
+                        ctx.moveTo(px + 30, py + 16); ctx.lineTo(px + 30, py + 25);
+                        ctx.moveTo(px + 24, py + 25); ctx.lineTo(px + 24, py + 34);
+                        ctx.moveTo(px + 15, py + 34); ctx.lineTo(px + 15, py + 44);
+                        ctx.moveTo(px + 32, py + 34); ctx.lineTo(px + 32, py + 44);
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#7c2d12'; 
+                        ctx.fillRect(px + 4, py + 12, 40, 4);
+
+                        ctx.fillStyle = '#b45309'; 
+                        ctx.fillRect(px + 4, py + 4, 6, 8);   
+                        ctx.fillRect(px + 38, py + 4, 6, 8);  
+                        ctx.fillRect(px + 19, py + 4, 10, 8); 
+                        ctx.fillRect(px + 4, py + 10, 40, 2); 
+
+                        ctx.fillStyle = '#0f172a';
+                        ctx.fillRect(px + 21, py + 22, 6, 10);
+
+                        if (!isBlueprint) {
+                            ctx.fillStyle = '#15803d'; 
+                            ctx.beginPath();
+                            ctx.arc(px + 24, py + 10, 4.5, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.strokeStyle = '#eab308';
+                            ctx.lineWidth = 1.5;
+                            ctx.beginPath();
+                            ctx.arc(px + 24, py + 10, 8, -Math.PI / 4, Math.PI / 4);
+                            ctx.stroke();
+                        }
+
+                        const pulse = Math.sin(Date.now() * 0.01) * 1.5;
+                        ctx.fillStyle = '#fbbf24'; 
+                        ctx.beginPath();
+                        ctx.arc(px + 12, py + 24, 3.5 + pulse, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#b45309';
+                        ctx.fillRect(px + 10, py + 27, 4, 2);
+
+                        ctx.restore();
+                    } else if (actualType === 'barracks') {
+                        ctx.save();
+                        ctx.fillStyle = '#475569';
+                        ctx.fillRect(px + 4, py + 24, 40, 20);
+
+                        ctx.fillStyle = '#b45309';
+                        ctx.fillRect(px + 8, py + 16, 32, 24);
+
+                        ctx.fillStyle = '#1e293b';
+                        ctx.beginPath();
+                        ctx.arc(px + 24, py + 16, 7, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = '#f59e0b';
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.moveTo(px + 20, py + 12); ctx.lineTo(px + 28, py + 20);
+                        ctx.moveTo(px + 28, py + 12); ctx.lineTo(px + 20, py + 20);
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#1e3a8a';
+                        ctx.beginPath();
+                        ctx.moveTo(px + 24, py + 2);
+                        ctx.lineTo(px + 2, py + 16);
+                        ctx.lineTo(px + 46, py + 16);
+                        ctx.closePath();
+                        ctx.fill();
+
+                        ctx.fillStyle = '#d97706'; 
+                        ctx.fillRect(px + 10, py + 34, 4, 10);
+                        ctx.fillStyle = '#fef08a'; 
+                        ctx.beginPath();
+                        ctx.arc(px + 12, py + 30, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = '#dc2626'; 
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(px + 9, py + 28, 6, 4);
+
+                        if (!isBlueprint && !isNight) {
+                            ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+                            ctx.fillRect(px + 2, py + 38, 44, 10);
+                            ctx.fillStyle = '#e2e8f0';
+                            ctx.font = '7px sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText("TRAIN", px + 24, py + 45);
+                        }
+
+                        ctx.restore();
+                    } else if (actualType === 'lumber_generator') {
+                        ctx.save();
+                        ctx.fillStyle = '#451a03'; 
+                        ctx.fillRect(px + 4, py + 16, 40, 26);
+                        ctx.strokeStyle = '#270e01';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(px + 4, py + 16, 40, 26);
+
+                        ctx.fillStyle = '#b45309'; 
+                        ctx.beginPath();
+                        ctx.moveTo(px + 24, py + 2);
+                        ctx.lineTo(px + 2, py + 16);
+                        ctx.lineTo(px + 46, py + 16);
+                        ctx.closePath();
+                        ctx.fill();
+
+                        const cx = px + 24;
+                        const cy = py + 30;
+                        ctx.fillStyle = '#94a3b8'; 
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, 9, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.strokeStyle = '#475569';
+                        ctx.lineWidth = 2;
+                        const teeth = 8;
+                        const spinAngle = (Date.now() * 0.015);
+                        for (let i = 0; i < teeth; i++) {
+                            const angle = spinAngle + (i * Math.PI * 2) / teeth;
+                            ctx.beginPath();
+                            ctx.moveTo(cx, cy);
+                            ctx.lineTo(cx + Math.cos(angle) * 13, cy + Math.sin(angle) * 13);
+                            ctx.stroke();
+                        }
+
+                        ctx.fillStyle = '#7c2d12';
+                        ctx.fillRect(px + 6, py + 32, 8, 5);
+
+                        ctx.restore();
+                    }
+
+                    ctx.restore();
+
+                    if (isBlueprint && !isDemolish) {
+                        ctx.save();
+                        ctx.strokeStyle = '#8b5cf6';
+                        ctx.lineWidth = 2.5;
+                        ctx.setLineDash([4, 4]);
+                        ctx.strokeRect(px + 3, py + 3, GRID_SIZE - 6, GRID_SIZE - 6);
+                        
+                        const alphaPulse = 0.15 + Math.sin(Date.now() * 0.005) * 0.05;
+                        ctx.fillStyle = `rgba(139, 92, 246, ${alphaPulse})`;
+                        ctx.fillRect(px + 4, py + 4, GRID_SIZE - 8, GRID_SIZE - 8);
+                        ctx.restore();
+                    }
+
+                    if (isDemolish) {
+                        ctx.save();
+                        ctx.strokeStyle = '#ef4444';
+                        ctx.lineWidth = 2.5;
+                        ctx.setLineDash([4, 4]);
+                        ctx.strokeRect(px + 3, py + 3, GRID_SIZE - 6, GRID_SIZE - 6);
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(px + 10, py + 10);
+                        ctx.lineTo(px + GRID_SIZE - 10, py + GRID_SIZE - 10);
+                        ctx.moveTo(px + GRID_SIZE - 10, py + 10);
+                        ctx.lineTo(px + 10, py + GRID_SIZE - 10);
+                        ctx.stroke();
+
+                        const alphaPulse = 0.15 + Math.sin(Date.now() * 0.005) * 0.05;
+                        ctx.fillStyle = `rgba(239, 68, 68, ${alphaPulse})`;
+                        ctx.fillRect(px + 4, py + 4, GRID_SIZE - 8, GRID_SIZE - 8);
+                        ctx.restore();
+                    }
+                }
+            }
+
+            if (selectedBuildOption && mouseTileX >= 0 && mouseTileX < MAP_TILES && mouseTileY >= 0 && mouseTileY < MAP_TILES) {
+                const px = mouseTileX * GRID_SIZE - camera.x;
+                const py = mouseTileY * GRID_SIZE - camera.y;
+
+                const hoverCell = grid[mouseTileX][mouseTileY];
+                const isValid = hoverCell.type === 'grass' && !isEntityOverlappingTile(mouseTileX, mouseTileY);
+
+                ctx.save();
+                ctx.globalAlpha = 0.6;
+                if (selectedBuildOption === 'demolish') {
+                    const canDemolish = hoverCell.type !== 'grass' && hoverCell.type !== 'tree' && hoverCell.type !== 'campfire';
+                    ctx.fillStyle = canDemolish ? '#ef4444' : 'rgba(15, 23, 42, 0.2)';
+                    ctx.strokeStyle = canDemolish ? '#f87171' : '#475569';
+                } else {
+                    ctx.fillStyle = isValid ? '#10b981' : '#ef4444'; 
+                    ctx.strokeStyle = isValid ? '#34d399' : '#f87171';
+                }
+                ctx.lineWidth = 3;
+                ctx.strokeRect(px, py, GRID_SIZE, GRID_SIZE);
+                ctx.fillRect(px, py, GRID_SIZE, GRID_SIZE);
+                ctx.restore();
+            }
+        }
+
+        function drawEntities() {
+            for (let p of projectiles) {
+                const px = p.x - camera.x;
+                const py = p.y - camera.y;
+                ctx.fillStyle = '#e2e8f0';
+                ctx.beginPath();
+                ctx.arc(px, py, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            for (let v of villagers) {
+                const px = v.x - camera.x;
+                const py = v.y - camera.y;
+
+                ctx.fillStyle = v.color;
+                ctx.beginPath();
+                ctx.arc(px, py, v.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.arc(px - 3, py - 1, 2, 0, Math.PI * 2);
+                ctx.arc(px + 3, py - 1, 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (v.job === 'woodcutter') {
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(px - 9, py - 12, 18, 5);
+                    ctx.beginPath();
+                    ctx.arc(px, py - 11, 6, Math.PI, 0);
+                    ctx.fill();
+                } else if (v.job === 'farmer') {
+                    ctx.fillStyle = '#eab308';
+                    ctx.beginPath();
+                    ctx.ellipse(px, py - 9, 13, 3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(px, py - 10, 5, Math.PI, 0);
+                    ctx.fill();
+                } else if (v.job === 'builder') {
+                    ctx.fillStyle = '#a855f7';
+                    ctx.beginPath();
+                    ctx.arc(px, py - 8, 7, Math.PI, 0);
+                    ctx.fill();
+                    ctx.fillRect(px - 7, py - 8, 16, 2);
+                } else if (v.job === 'soldier') {
+                    ctx.fillStyle = '#cbd5e1'; 
+                    ctx.beginPath();
+                    ctx.arc(px, py - 8, 6.5, Math.PI, 0);
+                    ctx.fill();
+                    ctx.fillRect(px - 7.5, py - 8, 15, 3.5);
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.beginPath();
+                    ctx.ellipse(px, py - 15, 2, 5, Math.PI/4, 0, Math.PI*2);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.beginPath();
+                    ctx.arc(px, py - 8, 6, Math.PI, 0);
+                    ctx.fill();
+                    ctx.fillStyle = '#f8fafc'; 
+                    ctx.beginPath();
+                    ctx.arc(px, py - 14, 2.5, 0, Math.PI*2);
+                    ctx.fill();
+                }
+
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = '8px sans-serif';
+                ctx.textAlign = 'center';
+                let initial = v.job.substring(0, 1).toUpperCase();
+                if (v.job === 'idle') initial = 'Z';
+                ctx.fillText(initial, px, py + 12);
+
+                if (v.health < v.maxHealth) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    ctx.fillRect(px - 8, py - 18, 16, 3);
+                    ctx.fillStyle = '#22c55e';
+                    ctx.fillRect(px - 8, py - 18, (v.health / v.maxHealth) * 16, 3);
+                }
+            }
+
+            for (let e of enemies) {
+                const px = e.x - camera.x;
+                const py = e.y - camera.y;
+
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+                ctx.beginPath();
+                ctx.arc(px, py, e.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#f59e0b';
+                ctx.beginPath();
+                ctx.arc(px - 3, py - 2, 1.8, 0, Math.PI * 2);
+                ctx.arc(px + 3, py - 2, 1.8, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(px - 10, py - 16, 20, 3);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(px - 10, py - 16, (e.health / e.maxHealth) * 20, 3);
+            }
+
+            const pX = player.x - camera.x;
+            const pY = player.y - camera.y;
+
+            ctx.fillStyle = '#2563eb';
+            ctx.beginPath();
+            ctx.arc(pX, pY, player.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.moveTo(pX - 10, pY - 8);
+            ctx.lineTo(pX - 12, pY - 18);
+            ctx.lineTo(pX - 4, pY - 12);
+            ctx.lineTo(pX, pY - 21);
+            ctx.lineTo(pX + 4, pY - 12);
+            ctx.lineTo(pX + 12, pY - 18);
+            ctx.lineTo(pX + 10, pY - 8);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.arc(pX, pY - 15, 1.5, 0, Math.PI*2);
+            ctx.arc(pX - 10, pY - 13, 1, 0, Math.PI*2);
+            ctx.arc(pX + 10, pY - 13, 1, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(pX - 4, pY + 1, 2.5, 0, Math.PI * 2);
+            ctx.arc(pX + 4, pY + 1, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (player.swinging) {
+                ctx.save();
+                ctx.translate(pX, pY);
+                ctx.rotate(player.facingLeft ? -player.swingAngle : player.swingAngle);
+                ctx.fillStyle = '#94a3b8'; 
+                ctx.fillRect(8, -16, 6, 12);
+                ctx.fillStyle = '#78350f'; 
+                ctx.fillRect(4, -14, 12, 4);
+                ctx.restore();
+            }
+
+            if (player.health < player.maxHealth) {
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(pX - 14, pY - 28, 28, 4);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(pX - 14, pY - 28, (player.health / player.maxHealth) * 28, 4);
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const part = particles[i];
+                part.update();
+                part.draw();
+                if (part.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        function applyNightLighting() {
+            let nightAlpha = 0;
+            const MAX_DARKNESS = 0.40; 
+
+            if (dayTime > 1800) {
+                nightAlpha = Math.min(MAX_DARKNESS, ((dayTime - 1800) / 400) * MAX_DARKNESS);
+            } else if (dayTime < 600) {
+                nightAlpha = Math.max(0, MAX_DARKNESS - ((dayTime / 400) * MAX_DARKNESS));
+            }
+
+            if (nightAlpha === 0) return;
+
+            lightCtx.clearRect(0, 0, lightCanvas.width, lightCanvas.height);
+
+            lightCtx.fillStyle = 'rgba(15, 23, 42, ' + nightAlpha + ')';
+            lightCtx.fillRect(0, 0, lightCanvas.width, lightCanvas.height);
+
+            lightCtx.save();
+            lightCtx.globalCompositeOperation = 'destination-out';
+
+            const flicker = Math.sin(Date.now() * 0.008) * 10 + Math.random() * 4;
+
+            function drawLightCircle(ctx, x, y, radius, intensity) {
+                const grad = ctx.createRadialGradient(x, y, 2, x, y, radius);
+                grad.addColorStop(0, 'rgba(0, 0, 0, ' + intensity + ')');
+                grad.addColorStop(0.35, 'rgba(0, 0, 0, ' + intensity * 0.72 + ')');
+                grad.addColorStop(0.7, 'rgba(0, 0, 0, ' + intensity * 0.25 + ')');
+                grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            drawLightCircle(lightCtx, player.x - camera.x, player.y - camera.y, 110 + (flicker * 0.35), 1.0);
+
+            const center = Math.floor(MAP_TILES / 2) * GRID_SIZE + GRID_SIZE/2;
+            drawLightCircle(lightCtx, center - camera.x, center - camera.y, 250 + flicker, 1.0);
+
+            for (let x = 0; x < MAP_TILES; x++) {
+                for (let y = 0; y < MAP_TILES; y++) {
+                    if (grid[x][y].type === 'house') {
+                        drawLightCircle(lightCtx, x * GRID_SIZE + 20 - camera.x, y * GRID_SIZE + 28 - camera.y, 130 + (flicker * 0.4), 0.85);
+                    } else if (grid[x][y].type === 'tower') {
+                        drawLightCircle(lightCtx, x * GRID_SIZE + 16 - camera.x, y * GRID_SIZE + 26 - camera.y, 210 + (flicker * 0.8), 0.95);
+                    } else if (grid[x][y].type === 'barracks') {
+                        drawLightCircle(lightCtx, x * GRID_SIZE + 24 - camera.x, y * GRID_SIZE + 24 - camera.y, 160 + (flicker * 0.5), 0.90);
+                    }
+                }
+            }
+
+            lightCtx.restore();
+
+            ctx.drawImage(lightCanvas, 0, 0);
+        }
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            lightCanvas.width = canvas.width;
+            lightCanvas.height = canvas.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function gameLoop() {
+            // Only update gameplay elements if the game is not over
+            if (!gameOverActive) {
+                handlePlayerMovement();
+                updateCamera();
+                handleTimeCycle();
+                updateCropGrowth();
+                
+                const now = Date.now();
+                if (now - lastLumberTick >= 1000) {
+                    let genCount = 0;
+                    for (let x = 0; x < MAP_TILES; x++) {
+                        for (let y = 0; y < MAP_TILES; y++) {
+                            if (grid[x][y].type === 'lumber_generator') {
+                                genCount++;
+                            }
+                        }
+                    }
+                    if (genCount > 0) {
+                        resources.wood += genCount;
+                        addLog(`Lumber Generators automatically generated +${genCount} Wood!`, 'text-amber-400 font-medium');
+                        updateUI();
+                        
+                        for (let x = 0; x < MAP_TILES; x++) {
+                            for (let y = 0; y < MAP_TILES; y++) {
+                                if (grid[x][y].type === 'lumber_generator') {
+                                    createImpactParticles(x * GRID_SIZE + 24, y * GRID_SIZE + 30, '#f59e0b', 2, 'spark');
+                                }
+                            }
+                        }
+                    }
+                    lastLumberTick = now;
+                }
+
+                runAmbientParticles();
+
+                for (let v of villagers) {
+                    v.update();
+                }
+
+                for (let e of enemies) {
+                    e.update();
+                }
+
+                updateDefenseTowers();
+                updateProjectiles();
+            }
+
+            // Always render even when the game is paused on the game over screen
+            drawMap();
+            drawEntities();
+            applyNightLighting();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        initGrid();
+        setupVillagers();
+        updateUI();
+
+        window.onload = function() {
+            gameLoop();
+        }
+    </script>
+</body>
+</html>
+    
+  </body>
+  
+</html>

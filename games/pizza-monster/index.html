@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pizza Monster: Cheese Chase</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for retro style -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background-color: #0d0614;
+            color: #ffffff;
+            touch-action: manipulation;
+        }
+        .arcade-glow {
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.5), inset 0 0 10px rgba(236, 72, 153, 0.3);
+        }
+        .text-glow-pizza {
+            text-shadow: 0 0 10px rgba(245, 158, 11, 0.8);
+        }
+        .text-glow-neon {
+            text-shadow: 0 0 10px rgba(236, 72, 153, 0.8);
+        }
+        canvas {
+            image-rendering: pixelated;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between min-h-screen p-4 select-none overflow-x-hidden">
+
+    <!-- Header Section -->
+    <header class="w-full max-w-lg text-center mt-2">
+        <h1 class="text-xl md:text-2xl font-bold tracking-widest text-fuchsia-500 text-glow-neon mb-2">PIZZA MONSTER</h1>
+        <div class="flex justify-between items-center bg-purple-950/40 border-2 border-pink-500 rounded-lg p-3 px-4 arcade-glow">
+            <div>
+                <p class="text-[8px] text-pink-300 mb-1">SCORE</p>
+                <p id="score-display" class="text-xs md:text-sm text-yellow-300 text-glow-pizza">0000</p>
+            </div>
+            <div>
+                <p class="text-[8px] text-pink-300 mb-1">BEST CHEF</p>
+                <p id="highscore-display" class="text-xs md:text-sm text-cyan-300">0000</p>
+            </div>
+            <div>
+                <p class="text-[8px] text-pink-300 mb-1">LIVES</p>
+                <div id="lives-container" class="flex gap-1 justify-center">
+                    <!-- Dynamic Pizza lives icons -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <main class="relative my-4 flex justify-center items-center w-full max-w-lg">
+        <div class="relative border-4 border-pink-500 rounded-xl overflow-hidden arcade-glow bg-black">
+            <canvas id="gameCanvas" width="448" height="496"></canvas>
+
+            <!-- Overlay Screen -->
+            <div id="overlay" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-center text-center p-6 transition-all duration-300">
+                <h2 id="overlay-title" class="text-lg text-yellow-400 text-glow-pizza mb-4">READY CHEF?</h2>
+                <p id="overlay-msg" class="text-[9px] text-gray-400 mb-6 leading-relaxed max-w-xs">EAT THE PEPPERONIS & AVOID THE ANGRY VEGGIES!</p>
+                <button id="start-btn" class="px-6 py-4 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-[10px] rounded-lg border-b-4 border-yellow-600 active:border-b-0 active:mt-1 transition-all">
+                    START THE CHASE
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Controller / Info Section -->
+    <footer class="w-full max-w-lg flex flex-col items-center gap-4 mb-2">
+        <!-- Touch Controller for Mobile -->
+        <div id="mobile-controls" class="grid grid-cols-3 gap-2 w-40 h-40 md:hidden">
+            <div></div>
+            <button id="btn-up" class="bg-purple-950/60 border-2 border-pink-500 active:bg-pink-600 rounded-xl flex items-center justify-center p-2 text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7"/></svg>
+            </button>
+            <div></div>
+            <button id="btn-left" class="bg-purple-950/60 border-2 border-pink-500 active:bg-pink-600 rounded-xl flex items-center justify-center p-2 text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="bg-black border-2 border-pink-900 rounded-full m-1"></div>
+            <button id="btn-right" class="bg-purple-950/60 border-2 border-pink-500 active:bg-pink-600 rounded-xl flex items-center justify-center p-2 text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <div></div>
+            <button id="btn-down" class="bg-purple-950/60 border-2 border-pink-500 active:bg-pink-600 rounded-xl flex items-center justify-center p-2 text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div></div>
+        </div>
+
+        <div class="text-[8px] text-pink-400 text-center select-none hidden md:block">
+            USE <span class="text-white">WASD</span> OR <span class="text-white">ARROW KEYS</span> TO ESCAPE THE VEGGIES
+        </div>
+    </footer>
+
+    <!-- Game Script -->
+    <script>
+        // --- Custom Arcade Synthesizer ---
+        class RetroAudio {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playChomp() {
+                if (!this.ctx) return;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                const t = this.ctx.currentTime;
+                osc.frequency.setValueAtTime(300, t);
+                osc.frequency.exponentialRampToValueAtTime(150, t + 0.06);
+                gain.gain.setValueAtTime(0.04, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(t + 0.06);
+            }
+
+            playPowerUp() {
+                if (!this.ctx) return;
+                const t = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(200, t);
+                osc.frequency.linearRampToValueAtTime(600, t + 0.2);
+                gain.gain.setValueAtTime(0.08, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(t + 0.2);
+            }
+
+            playVeggieEaten() {
+                if (!this.ctx) return;
+                const t = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, t);
+                osc.frequency.linearRampToValueAtTime(1200, t + 0.4);
+                gain.gain.setValueAtTime(0.12, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(t + 0.4);
+            }
+
+            playSplat() {
+                if (!this.ctx) return;
+                const t = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, t);
+                osc.frequency.exponentialRampToValueAtTime(40, t + 1.0);
+                gain.gain.setValueAtTime(0.12, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(t + 1.0);
+            }
+
+            playIntro() {
+                if (!this.ctx) return;
+                const notes = [
+                    261, 329, 392, 523, 392, 523, 0,
+                    293, 349, 440, 587, 440, 587, 0,
+                    261, 329, 392, 523, 392, 523, 0,
+                    523, 494, 440, 392, 349, 329, 293, 261
+                ];
+                const t = this.ctx.currentTime;
+                const duration = 0.08;
+                notes.forEach((freq, i) => {
+                    if (freq === 0) return;
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, t + i * duration);
+                    gain.gain.setValueAtTime(0.04, t + i * duration);
+                    gain.gain.setValueAtTime(0, t + (i + 0.8) * duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(t + i * duration);
+                    osc.stop(t + (i + 1) * duration);
+                });
+            }
+
+            playVictory() {
+                if (!this.ctx) return;
+                const notes = [
+                    523, 587, 659, 698, 784, 880, 988, 1047, 1200, 1047
+                ];
+                const t = this.ctx.currentTime;
+                const duration = 0.12;
+                notes.forEach((freq, i) => {
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, t + i * duration);
+                    gain.gain.setValueAtTime(0.06, t + i * duration);
+                    gain.gain.setValueAtTime(0, t + (i + 0.8) * duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(t + i * duration);
+                    osc.stop(t + (i + 1) * duration);
+                });
+            }
+        }
+
+        const sound = new RetroAudio();
+
+        // --- Game Setup ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score-display');
+        const highscoreDisplay = document.getElementById('highscore-display');
+        const livesContainer = document.getElementById('lives-container');
+        const overlay = document.getElementById('overlay');
+        const overlayTitle = document.getElementById('overlay-title');
+        const overlayMsg = document.getElementById('overlay-msg');
+        const startBtn = document.getElementById('start-btn');
+
+        const TILE_SIZE = 16;
+        const GRID_WIDTH = 28;
+        const GRID_HEIGHT = 31;
+
+        let score = 0;
+        let highscore = parseInt(localStorage.getItem('pizzamonster_highscore')) || 0;
+        highscoreDisplay.textContent = String(highscore).padStart(4, '0');
+
+        let lives = 3;
+        let gameActive = false;
+        let gameOver = false;
+        let powerPelletActive = false;
+        let powerPelletTimer = 0;
+
+        // Custom Neon Maze Grid Layout
+        // 1: Wall, 2: Pepperoni, 3: Golden Pineapple, 4: Garden Gate, 5: Garden Inside, 0: Empty
+        const initialMap = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1],
+            [1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1],
+            [1,3,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,3,1],
+            [1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1],
+            [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+            [1,2,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,2,1],
+            [1,2,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,2,1],
+            [1,2,2,2,2,2,2,1,1,2,2,2,2,1,1,2,2,2,2,1,1,2,2,2,2,2,2,1],
+            [1,1,1,1,1,1,2,1,1,1,1,1,0,1,1,0,1,1,1,1,1,2,1,1,1,1,1,1],
+            [0,0,0,0,0,1,2,1,1,1,1,1,0,1,1,0,1,1,1,1,1,2,1,0,0,0,0,0],
+            [0,0,0,0,0,1,2,1,1,0,0,0,0,0,0,0,0,0,0,1,1,2,1,0,0,0,0,0],
+            [0,0,0,0,0,1,2,1,1,0,1,1,1,4,4,1,1,1,0,1,1,2,1,0,0,0,0,0],
+            [1,1,1,1,1,1,2,1,1,0,1,5,5,5,5,5,5,1,0,1,1,2,1,1,1,1,1,1],
+            [0,0,0,0,0,0,2,0,0,0,1,5,5,5,5,5,5,1,0,0,0,2,0,0,0,0,0,0],
+            [1,1,1,1,1,1,2,1,1,0,1,5,5,5,5,5,5,1,0,1,1,2,1,1,1,1,1,1],
+            [0,0,0,0,0,1,2,1,1,0,1,1,1,1,1,1,1,1,0,1,1,2,1,0,0,0,0,0],
+            [0,0,0,0,0,1,2,1,1,0,0,0,0,0,0,0,0,0,0,1,1,2,1,0,0,0,0,0],
+            [0,0,0,0,0,1,2,1,1,0,1,1,1,1,1,1,1,1,0,1,1,2,1,0,0,0,0,0],
+            [1,1,1,1,1,1,2,1,1,0,1,1,1,1,1,1,1,1,0,1,1,2,1,1,1,1,1,1],
+            [1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1],
+            [1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1],
+            [1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1],
+            [1,3,2,2,1,1,2,2,2,2,2,2,2,0,0,2,2,2,2,2,2,2,1,1,2,2,3,1],
+            [1,1,1,2,1,1,2,1,1,2,1,1,1,1,1,1,1,1,2,1,1,2,1,1,2,1,1,1],
+            [1,1,1,2,1,1,2,1,1,2,1,1,1,1,1,1,1,1,2,1,1,2,1,1,2,1,1,1],
+            [1,2,2,2,2,2,2,1,1,2,2,2,2,1,1,2,2,2,2,1,1,2,2,2,2,2,2,1],
+            [1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1],
+            [1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1],
+            [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        let map = JSON.parse(JSON.stringify(initialMap));
+
+        // Directions Configuration
+        const DIR_UP = { x: 0, y: -1, angle: Math.PI * 1.5 };
+        const DIR_DOWN = { x: 0, y: 1, angle: Math.PI * 0.5 };
+        const DIR_LEFT = { x: -1, y: 0, angle: Math.PI };
+        const DIR_RIGHT = { x: 1, y: 0, angle: 0 };
+        const DIR_NONE = { x: 0, y: 0, angle: 0 };
+
+        // --- Entity Class ---
+        class Entity {
+            constructor(gridX, gridY) {
+                this.gridX = gridX;
+                this.gridY = gridY;
+                this.x = gridX * TILE_SIZE + TILE_SIZE / 2;
+                this.y = gridY * TILE_SIZE + TILE_SIZE / 2;
+                this.dir = DIR_NONE;
+                this.nextDir = DIR_NONE;
+                this.speed = 2; // Fixed speed division logic
+            }
+
+            alignToGrid() {
+                this.gridX = Math.round((this.x - TILE_SIZE / 2) / TILE_SIZE);
+                this.gridY = Math.round((this.y - TILE_SIZE / 2) / TILE_SIZE);
+                this.x = this.gridX * TILE_SIZE + TILE_SIZE / 2;
+                this.y = this.gridY * TILE_SIZE + TILE_SIZE / 2;
+            }
+
+            isAtCenter() {
+                // Robust floating point modulo mapping to locate path center intersections
+                const offsetX = (this.x - TILE_SIZE / 2) % TILE_SIZE;
+                const offsetY = (this.y - TILE_SIZE / 2) % TILE_SIZE;
+                
+                // Keep values wrapped safely between 0 and 16
+                const rx = (offsetX + TILE_SIZE) % TILE_SIZE;
+                const ry = (offsetY + TILE_SIZE) % TILE_SIZE;
+
+                return (rx < 0.1 || rx > TILE_SIZE - 0.1) && (ry < 0.1 || ry > TILE_SIZE - 0.1);
+            }
+
+            canMove(dir) {
+                if (dir === DIR_NONE) return true;
+                let checkX = this.gridX + dir.x;
+                let checkY = this.gridY + dir.y;
+
+                // Portal wrapping rows
+                if (checkX < 0 || checkX >= GRID_WIDTH) {
+                    return this.gridY === 14; 
+                }
+                const tile = map[checkY]?.[checkX];
+                return tile !== 1 && tile !== 4; // Block solid wall and garden gate
+            }
+        }
+
+        // --- Pizza Monster Player ---
+        class PizzaMonster extends Entity {
+            constructor(gridX, gridY) {
+                super(gridX, gridY);
+                this.mouthAngle = 0.2;
+                this.mouthSpeed = 0.05;
+                this.dir = DIR_LEFT;
+                this.nextDir = DIR_LEFT;
+                this.speed = 2;
+            }
+
+            update() {
+                if (this.isAtCenter()) {
+                    this.alignToGrid();
+
+                    // Wrap-around portal escape
+                    if (this.gridX < 0) {
+                        this.gridX = GRID_WIDTH - 1;
+                        this.x = this.gridX * TILE_SIZE + TILE_SIZE / 2;
+                    } else if (this.gridX >= GRID_WIDTH) {
+                        this.gridX = 0;
+                        this.x = this.gridX * TILE_SIZE + TILE_SIZE / 2;
+                    }
+
+                    if (this.canMove(this.nextDir)) {
+                        this.dir = this.nextDir;
+                    } else if (!this.canMove(this.dir)) {
+                        this.dir = DIR_NONE;
+                    }
+                }
+
+                this.x += this.dir.x * this.speed;
+                this.y += this.dir.y * this.speed;
+
+                // Animating mouth open/close cycle
+                if (this.dir !== DIR_NONE) {
+                    this.mouthAngle += this.mouthSpeed;
+                    if (this.mouthAngle > 0.45 || this.mouthAngle < 0.05) {
+                        this.mouthSpeed = -this.mouthSpeed;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.dir.angle);
+
+                ctx.beginPath();
+                ctx.fillStyle = '#f59e0b'; // golden yellow crust
+                ctx.arc(0, 0, TILE_SIZE / 2, this.mouthAngle, Math.PI * 2 - this.mouthAngle);
+                ctx.lineTo(0, 0);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw pepperoni slices on the Pizza Monster!
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(-2, -3, 2, 0, Math.PI * 2);
+                ctx.arc(-3, 3, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Monster eye
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(1, -3, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(2, -3, 1, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        // --- Angry Veggies (The "Ripoff" Ghosts) ---
+        class VeggieGhost extends Entity {
+            constructor(gridX, gridY, color, name, scatterX, scatterY, veggieType) {
+                super(gridX, gridY);
+                this.color = color;
+                this.name = name;
+                this.veggieType = veggieType; 
+                this.speed = 1; 
+                this.scatterTarget = { x: scatterX, y: scatterY };
+                this.isFrightened = false;
+                this.isEaten = false;
+                this.respawning = false;
+            }
+
+            canMove(dir) {
+                if (dir === DIR_NONE) return true;
+                let checkX = this.gridX + dir.x;
+                let checkY = this.gridY + dir.y;
+
+                if (checkX < 0 || checkX >= GRID_WIDTH) {
+                    return this.gridY === 14; 
+                }
+                const tile = map[checkY]?.[checkX];
+
+                if (tile === 4) { // Cage gate door
+                    return this.respawning || this.isEaten || (this.gridY >= 12 && this.gridY <= 15);
+                }
+
+                return tile !== 1; // Can never walk through brick walls (1)
+            }
+
+            update(targetPlayer) {
+                if (this.isAtCenter()) {
+                    this.alignToGrid();
+
+                    // Wrap-around portals for ghosts
+                    if (this.gridX < 0) {
+                        this.gridX = GRID_WIDTH - 1;
+                        this.x = this.gridX * TILE_SIZE + TILE_SIZE / 2;
+                    } else if (this.gridX >= GRID_WIDTH) {
+                        this.gridX = 0;
+                        this.x = this.gridX * TILE_SIZE + TILE_SIZE / 2;
+                    }
+
+                    // Reached the compost cage (reborn)
+                    if (this.isEaten && this.gridX >= 12 && this.gridX <= 15 && this.gridY >= 12 && this.gridY <= 15) {
+                        this.isEaten = false;
+                        this.respawning = false;
+                    }
+
+                    let target = this.getTarget(targetPlayer);
+                    let possibleDirs = [DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT];
+                    let bestDir = null;
+                    let minDist = Infinity;
+                    let reverseDir = { x: -this.dir.x, y: -this.dir.y };
+
+                    possibleDirs.forEach(d => {
+                        // Do not allow reversing directions unless forced (classic pacman path rules)
+                        if (this.dir !== DIR_NONE && d.x === reverseDir.x && d.y === reverseDir.y) return;
+                        
+                        if (this.canMove(d)) {
+                            let nextX = this.gridX + d.x;
+                            let nextY = this.gridY + d.y;
+                            let dist = Math.hypot(nextX - target.x, nextY - target.y);
+                            if (dist < minDist) {
+                                minDist = dist;
+                                bestDir = d;
+                            }
+                        }
+                    });
+
+                    if (!bestDir && this.canMove(reverseDir)) {
+                        bestDir = reverseDir;
+                    }
+
+                    this.dir = bestDir || DIR_NONE;
+                }
+
+                // Dynamic speed controls keeping factors aligned
+                let currentSpeed = this.speed; 
+                if (this.isEaten) {
+                    currentSpeed = 2; // Super-speed return path
+                } else if (this.isFrightened) {
+                    currentSpeed = 1; // Standard pace
+                }
+
+                this.x += this.dir.x * currentSpeed;
+                this.y += this.dir.y * currentSpeed;
+            }
+
+            getTarget(targetPlayer) {
+                if (this.isEaten) {
+                    return { x: 13, y: 13 }; // Fly straight home
+                }
+
+                if (this.isFrightened) {
+                    // Wander completely at random when edible
+                    return {
+                        x: Math.floor(Math.random() * GRID_WIDTH),
+                        y: Math.floor(Math.random() * GRID_HEIGHT)
+                    };
+                }
+
+                // PROXIMITY AGGRESSION RULE:
+                // If the player gets within 6 tiles, the Veggies will aggressively target them directly!
+                let distToPlayer = Math.hypot(this.gridX - targetPlayer.gridX, this.gridY - targetPlayer.gridY);
+                if (distToPlayer <= 6) {
+                    return { x: targetPlayer.gridX, y: targetPlayer.gridY };
+                }
+
+                // Traditional behaviors when far away:
+                switch (this.name) {
+                    case 'Broccoli': // Direct pursuit
+                        return { x: targetPlayer.gridX, y: targetPlayer.gridY };
+                    case 'Pepper': // Cut off corners ahead
+                        return { x: targetPlayer.gridX + targetPlayer.dir.x * 3, y: targetPlayer.gridY + targetPlayer.dir.y * 3 };
+                    case 'Onion': // Flanker targeting behind
+                        return { x: targetPlayer.gridX - targetPlayer.dir.x * 2, y: targetPlayer.gridY - targetPlayer.dir.y * 2 };
+                    case 'Tomato': // Moody corner camper
+                        return this.scatterTarget;
+                    default:
+                        return this.scatterTarget;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                let radius = TILE_SIZE / 2;
+
+                if (this.isEaten) {
+                    // Draw flying eyes
+                    this.drawEyes();
+                } else {
+                    ctx.beginPath();
+                    if (this.isFrightened) {
+                        ctx.fillStyle = '#2563eb'; // Dark blue scared mode
+                        if (powerPelletTimer < 2000 && Math.floor(Date.now() / 200) % 2 === 0) {
+                            ctx.fillStyle = '#ffffff'; // Retro warning flash
+                        }
+                    } else {
+                        ctx.fillStyle = this.color;
+                    }
+
+                    // Render veggie shapes
+                    if (this.veggieType === 'broccoli' && !this.isFrightened) {
+                        // Fluffy crown
+                        ctx.arc(0, -3, radius * 1.1, Math.PI, 0, false);
+                        ctx.arc(-4, 0, radius * 0.8, Math.PI * 0.5, Math.PI * 1.5, false);
+                        ctx.arc(4, 0, radius * 0.8, Math.PI * 1.5, Math.PI * 0.5, false);
+                        ctx.lineTo(2, radius);
+                        ctx.lineTo(-2, radius);
+                    } else if (this.veggieType === 'tomato' && !this.isFrightened) {
+                        // Round fat tomato
+                        ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                        ctx.fillStyle = '#22c55e';
+                        ctx.fillRect(-2, -radius - 2, 4, 3);
+                        ctx.fillStyle = this.color;
+                    } else if (this.veggieType === 'pepper' && !this.isFrightened) {
+                        // Tapered pepper
+                        ctx.arc(0, -2, radius, Math.PI, 0, false);
+                        ctx.lineTo(radius * 0.6, radius);
+                        ctx.lineTo(-radius * 0.6, radius);
+                    } else {
+                        // Flappy Onion shape
+                        ctx.arc(0, -2, radius, Math.PI, 0, false);
+                        ctx.lineTo(radius, radius);
+                        ctx.lineTo(radius * 0.5, radius * 0.5);
+                        ctx.lineTo(0, radius);
+                        ctx.lineTo(-radius * 0.5, radius * 0.5);
+                        ctx.lineTo(-radius, radius);
+                    }
+
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Stem on peppers
+                    if (this.veggieType === 'pepper' && !this.isFrightened) {
+                        ctx.fillStyle = '#22c55e';
+                        ctx.fillRect(-1.5, -radius - 3, 3, 3);
+                    }
+
+                    this.drawEyes();
+                }
+
+                ctx.restore();
+            }
+
+            drawEyes() {
+                let dx = this.dir.x * 1.5;
+                let dy = this.dir.y * 1.5;
+
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(-3 + dx, -3 + dy, 3, 0, Math.PI * 2);
+                ctx.arc(3 + dx, -3 + dy, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Pupil logic
+                ctx.fillStyle = this.isFrightened ? '#facc15' : '#000000';
+                ctx.beginPath();
+                ctx.arc(-3 + dx * 1.5, -3 + dy * 1.5, this.isFrightened ? 1 : 1.5, 0, Math.PI * 2);
+                ctx.arc(3 + dx * 1.5, -3 + dy * 1.5, this.isFrightened ? 1 : 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // --- Instantiate Entities ---
+        let pacman = new PizzaMonster(14, 23);
+        let ghosts = [
+            new VeggieGhost(13, 11, '#22c55e', 'Broccoli', GRID_WIDTH, 0, 'broccoli'),     // Green
+            new VeggieGhost(14, 11, '#ef4444', 'Pepper', 0, 0, 'pepper'),                 // Red
+            new VeggieGhost(13, 14, '#a855f7', 'Onion', GRID_WIDTH, GRID_HEIGHT, 'onion'), // Purple
+            new VeggieGhost(14, 14, '#f97316', 'Tomato', 0, GRID_HEIGHT, 'tomato')         // Orange-Red
+        ];
+
+        // --- Render Arena / Map ---
+        function drawMap() {
+            for (let r = 0; r < GRID_HEIGHT; r++) {
+                for (let c = 0; c < GRID_WIDTH; c++) {
+                    const tile = map[r][c];
+                    const x = c * TILE_SIZE;
+                    const y = r * TILE_SIZE;
+
+                    if (tile === 1) { // Wall with neon glow outlines
+                        ctx.fillStyle = '#1e0b36'; // deep dark purple filling
+                        ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+                        
+                        ctx.strokeStyle = '#ec4899'; // pink neon
+                        ctx.lineWidth = 1.2;
+                        ctx.strokeRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+                    } else if (tile === 2) { // Pepperoni dot
+                        ctx.fillStyle = '#ef4444'; // Red pepperoni dot
+                        ctx.beginPath();
+                        ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                        // White highlights
+                        ctx.fillStyle = '#fca5a5';
+                        ctx.beginPath();
+                        ctx.arc(x + TILE_SIZE/2 - 1, y + TILE_SIZE/2 - 1, 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (tile === 3) { // Golden Pineapple power-up
+                        ctx.fillStyle = '#facc15';
+                        if (Math.floor(Date.now() / 150) % 2 === 0) {
+                            // Draw Pineapple shape
+                            ctx.beginPath();
+                            ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2 + 1, 5, 0, Math.PI * 2);
+                            ctx.fill();
+                            // Green leaves
+                            ctx.fillStyle = '#22c55e';
+                            ctx.beginPath();
+                            ctx.moveTo(x + TILE_SIZE/2, y + TILE_SIZE/2 - 6);
+                            ctx.lineTo(x + TILE_SIZE/2 - 3, y + TILE_SIZE/2 - 2);
+                            ctx.lineTo(x + TILE_SIZE/2 + 3, y + TILE_SIZE/2 - 2);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
+                    } else if (tile === 4) { // Guard Gate
+                        ctx.fillStyle = '#a855f7';
+                        ctx.fillRect(x, y + TILE_SIZE / 2 - 2, TILE_SIZE, 4);
+                    }
+                }
+            }
+        }
+
+        // --- Lives Panel representation ---
+        function updateLivesUI() {
+            livesContainer.innerHTML = '';
+            for (let i = 0; i < lives; i++) {
+                livesContainer.innerHTML += `
+                    <svg class="w-5 h-5 text-yellow-500 fill-current" viewBox="0 0 24 24">
+                        <path d="M12,2L1,21H23L12,2M12,6L18.8,18H5.2L12,6Z" />
+                    </svg>
+                `;
+            }
+        }
+
+        // --- Game Main Loops ---
+        let lastTime = 0;
+        function gameLoop(timestamp) {
+            let dt = timestamp - lastTime;
+            if (!dt) dt = 0;
+            lastTime = timestamp;
+
+            if (gameActive) {
+                // Decay power timer
+                if (powerPelletActive) {
+                    powerPelletTimer -= dt;
+                    if (powerPelletTimer <= 0) {
+                        powerPelletActive = false;
+                        ghosts.forEach(g => g.isFrightened = false);
+                    }
+                }
+
+                pacman.update();
+                ghosts.forEach(ghost => ghost.update(pacman));
+                checkCollisions();
+            }
+
+            // Draw frame
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawMap();
+            pacman.draw();
+            ghosts.forEach(ghost => ghost.draw());
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- Interaction Collision checks ---
+        function checkCollisions() {
+            // Eat Pellets
+            let currentTile = map[pacman.gridY]?.[pacman.gridX];
+            if (currentTile === 2) { 
+                map[pacman.gridY][pacman.gridX] = 0;
+                score += 10;
+                sound.playChomp();
+                updateScore();
+                checkWinCondition();
+            } else if (currentTile === 3) { 
+                map[pacman.gridY][pacman.gridX] = 0;
+                score += 50;
+                sound.playPowerUp();
+                updateScore();
+                triggerPowerPellet();
+                checkWinCondition();
+            }
+
+            // Hit Veggies
+            ghosts.forEach(ghost => {
+                let dist = Math.hypot(pacman.x - ghost.x, pacman.y - ghost.y);
+                if (dist < TILE_SIZE * 0.8) {
+                    if (ghost.isFrightened) {
+                        ghost.isFrightened = false;
+                        ghost.isEaten = true;
+                        score += 200;
+                        updateScore();
+                        sound.playVeggieEaten();
+                    } else if (!ghost.isEaten) {
+                        handlePlayerDeath();
+                    }
+                }
+            });
+        }
+
+        function triggerPowerPellet() {
+            powerPelletActive = true;
+            powerPelletTimer = 7000; // 7 seconds
+            ghosts.forEach(ghost => {
+                if (!ghost.isEaten) {
+                    ghost.isFrightened = true;
+                }
+            });
+        }
+
+        function updateScore() {
+            scoreDisplay.textContent = String(score).padStart(4, '0');
+            if (score > highscore) {
+                highscore = score;
+                localStorage.setItem('pizzamonster_highscore', highscore);
+                highscoreDisplay.textContent = String(highscore).padStart(4, '0');
+            }
+        }
+
+        function handlePlayerDeath() {
+            gameActive = false;
+            sound.playSplat();
+            lives--;
+            updateLivesUI();
+
+            if (lives <= 0) {
+                gameOver = true;
+                showOverlay("OUT OF CHEF LIVES!", "THE VEGGIES RUINED THE PIZZA!");
+            } else {
+                setTimeout(() => {
+                    resetPositions();
+                    gameActive = true;
+                }, 1500);
+            }
+        }
+
+        function checkWinCondition() {
+            let remainingPellets = 0;
+            for (let r = 0; r < GRID_HEIGHT; r++) {
+                for (let c = 0; c < GRID_WIDTH; c++) {
+                    if (map[r][c] === 2 || map[r][c] === 3) {
+                        remainingPellets++;
+                    }
+                }
+            }
+
+            // Exactly 0 food left means Chef Victory!
+            if (remainingPellets === 0) {
+                gameActive = false;
+                sound.playVictory();
+                showOverlay("VICTORY!", "CHEF LEVEL COMPLETED!");
+            }
+        }
+
+        function resetPositions() {
+            pacman = new PizzaMonster(14, 23);
+            ghosts = [
+                new VeggieGhost(13, 11, '#22c55e', 'Broccoli', GRID_WIDTH, 0, 'broccoli'),
+                new VeggieGhost(14, 11, '#ef4444', 'Pepper', 0, 0, 'pepper'),
+                new VeggieGhost(13, 14, '#a855f7', 'Onion', GRID_WIDTH, GRID_HEIGHT, 'onion'),
+                new VeggieGhost(14, 14, '#f97316', 'Tomato', 0, GRID_HEIGHT, 'tomato')
+            ];
+            powerPelletActive = false;
+            powerPelletTimer = 0;
+        }
+
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            gameOver = false;
+            map = JSON.parse(JSON.stringify(initialMap));
+            updateScore();
+            updateLivesUI();
+            resetPositions();
+        }
+
+        function showOverlay(title, msg) {
+            overlayTitle.textContent = title;
+            overlayMsg.textContent = msg;
+            startBtn.textContent = gameOver || title === "VICTORY!" ? "PLAY AGAIN" : "START THE CHASE";
+            overlay.style.display = "flex";
+            overlay.classList.remove("opacity-0", "pointer-events-none");
+        }
+
+        function hideOverlay() {
+            overlay.classList.add("opacity-0", "pointer-events-none");
+            setTimeout(() => {
+                overlay.style.display = "none";
+            }, 300);
+        }
+
+        // --- Controls (Keyboard WASD & ARROWS) ---
+        window.addEventListener('keydown', e => {
+            if (!gameActive) return;
+            switch (e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    pacman.nextDir = DIR_UP;
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    pacman.nextDir = DIR_DOWN;
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    pacman.nextDir = DIR_LEFT;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    pacman.nextDir = DIR_RIGHT;
+                    break;
+            }
+        });
+
+        // Touch buttons binding
+        const bindTouch = (id, direction) => {
+            document.getElementById(id).addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                sound.init();
+                if (gameActive) pacman.nextDir = direction;
+            });
+            document.getElementById(id).addEventListener('mousedown', (e) => {
+                sound.init();
+                if (gameActive) pacman.nextDir = direction;
+            });
+        };
+
+        bindTouch('btn-up', DIR_UP);
+        bindTouch('btn-down', DIR_DOWN);
+        bindTouch('btn-left', DIR_LEFT);
+        bindTouch('btn-right', DIR_RIGHT);
+
+        // Start handler
+        startBtn.addEventListener('click', () => {
+            sound.init();
+            sound.playIntro();
+            hideOverlay();
+            
+            if (gameOver || overlayTitle.textContent === "VICTORY!") {
+                resetGame();
+            }
+            
+            setTimeout(() => {
+                gameActive = true;
+            }, 2500); // Give player time during intro jingle
+        });
+
+        // Initialize display and start tick animation loop
+        updateLivesUI();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
