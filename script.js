@@ -40,8 +40,8 @@ const games = [
     title: "Campfire and Crown",
     description: "A cozy yet competitive adventure — gather, craft, and claim your crown.",
     category: "Arcade",
-    featured: false,
-    trending: false,
+    featured: true,
+    trending: true,
     thumbnail: "🔥👑",
     icon: "icons/campfire-and-crown.svg",
     accent: "linear-gradient(135deg, #f97316, #f43f5e)",
@@ -52,8 +52,8 @@ const games = [
     title: "Pizza Monster",
     description: "Chomp pizzas, dodge oven hazards, and grow into the ultimate pizza monster.",
     category: "Arcade",
-    featured: false,
-    trending: false,
+    featured: true,
+    trending: true,
     thumbnail: "🍕",
     icon: "icons/pizza-monster.svg",
     accent: "linear-gradient(135deg, #f97316, #f59e0b)",
@@ -90,7 +90,7 @@ function renderCategoryFilters() {
 
 function createCardMarkup(game) {
   const thumb = game.icon
-    ? `<img src="${game.icon}" alt="${game.title} icon" style="width:48px;height:48px;object-fit:contain;border-radius:8px;">`
+    ? `<img src="${game.icon}" alt="${game.title} icon" loading="lazy">`
     : game.thumbnail;
 
   return `
@@ -120,7 +120,7 @@ function renderGames() {
   const trendingGames = games.filter((game) => {
     const matchesSearch = game.title.toLowerCase().includes(search) || game.description.toLowerCase().includes(search);
     const matchesCategory = activeCategory === "All" || game.category === activeCategory;
-    return game.trending && matchesSearch && matchesCategory;
+    return matchesSearch && matchesCategory;
   });
 
   featuredRoot.innerHTML = featuredGames.length
